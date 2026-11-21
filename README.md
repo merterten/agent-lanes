@@ -53,7 +53,7 @@ The reviewer reads 30 lines instead of a whole agent transcript. Every number in
 ## Setup
 
 ```
-git clone https://github.com/<you>/agent-lanes && cd agent-lanes
+git clone https://github.com/merterten/agent-lanes && cd agent-lanes
 python3 -m unittest discover -s agent_lanes          # 219 tests, temp dirs only
 ln -s "$PWD/agent_lanes/lane.py" ~/.local/bin/lane
 ```
