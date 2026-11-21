@@ -1,0 +1,11 @@
+---
+RESULT CONTRACT for lane {LANE} (required in addition to the task above)
+When you finish, or stop because you are blocked, write two files in the folder `.lane/` at the root of this worktree (create the folder):
+1. `.lane/LANE_RESULT.json`, exactly this shape:
+{"lane": "{LANE}", "status": "done" | "partial" | "blocked", "summary": "at most 3 sentences",
+ "files_changed": ["relative/path", ...],
+ "tests": [{"cmd": "exact command you ran", "passed": <int>, "failed": <int>}],
+ "claims": [{"name": "...", "value": <number or string>, "evidence": "file or command that shows it"}],
+ "blockers": ["..."]}
+2. `.lane/REPORT.md`: at most 60 lines. What you did, what is left, what the reviewer must check.
+Rules: list only tests you really ran in this session, with their real counts. Never weaken or delete a test to make it pass. Write nothing else in .lane/. Do not run git in this worktree (it does not work here); git in a temporary repo under /tmp is fine. The reviewer reruns your tests and mutates your code; numbers that do not match fail the lane.

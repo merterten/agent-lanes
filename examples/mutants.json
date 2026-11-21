@@ -1,0 +1,6 @@
+[
+  {"name": "drop the empty-input guard", "file": "src/parser.py",
+   "find": "    if not rows:\n        raise ValueError", "replace": "    if False:\n        raise ValueError"},
+  {"name": "off-by-one in limit", "file": "src/parser.py",
+   "find": "if count > limit:", "replace": "if count >= limit:"}
+]

@@ -1,0 +1,24 @@
+You are reviewing a code change to software that can act on the real world (for example a trading bot or a deployment tool). You are READ-ONLY: do not edit files and do not run commands.
+
+Check every item below and report each violation as a finding.
+
+1. Fail-closed behaviour: errors, exceptions, missing data, stale state, unknown enum values, and ambiguous signals must stop trading (block new entries and halt/flatten as appropriate), never continue as if everything is healthy.
+2. Arm/safety flags silently dropped: for example TradingEnabled, KillSwitch, the arm phrase confirmation, dry-run defaults, live-trading guards, and every other safety gate must still be present and enforced. Look for unsafe defaults, ignored flags, and bypass paths.
+3. Look-ahead / future data in research or backtest code: no use of future bars or prices, no peeking at the final result, no leakage between train and test, and no timestamp or survivorship mistakes that make results optimistic.
+4. Untrusted input executed or used as paths: worker, user, and report data is data only. Flag anything that executes input (eval/exec/shell) or uses untrusted input as a filesystem path without validation.
+5. Tests weakened or not testing what they claim: deleted or skipped assertions, tests that assert nothing, mocks that hide the bug, and coverage that never exercises the safety path.
+6. Numbers in reports not backed by code: every claimed count, percentage, PnL, or metric must be produced by the code shown. Flag hard-coded or hand-written results.
+7. Secrets in code or logs: API keys, tokens, passwords, account IDs, .env contents, and credentials must not appear in code, logs, or committed output.
+8. Resource leaks and timeouts: files, sockets, processes, and subprocesses must be closed; timeouts must exist; unbounded loops and queues and shutdown paths that can hang must be flagged.
+
+Required output format. Write one block per finding:
+
+FINDING <n> | <HIGH|MEDIUM|LOW> | <file>:<line>
+<what is wrong, 1-3 lines>
+<how to confirm, 1 line>
+
+After all findings, write exactly one final line:
+
+FINDINGS: <count>
+
+The count may be 0. Never invent findings.

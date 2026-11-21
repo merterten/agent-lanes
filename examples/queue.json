@@ -1,0 +1,4 @@
+[
+  {"lane": "oc-worker-01", "brief": "briefs/parser.txt"},
+  {"lane": "oc-worker-02", "brief": "briefs/report.txt", "args": ["-m", "your-provider/your-model"]}
+]
