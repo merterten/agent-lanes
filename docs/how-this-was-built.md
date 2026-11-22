@@ -49,3 +49,16 @@ Final state: 219 tests, all passing.
 3. **Split work by file and fix the interfaces up front.** Six agents in parallel produced zero merge conflicts.
 4. **Make the agent report in a schema**, then verify every number in it. Reading a 30-line result instead of a transcript is what makes reviewing six lanes at once possible.
 5. **Destructive commands default to a dry run.** Most of the dangerous bugs above were in the "clean up" and "merge" paths.
+
+## Round 2: multi-machine lanes (same workflow)
+
+Two more DeepSeek lanes added built-in SSH hosts (AL1) and a queue that spreads lanes over several machines (AL2).
+Both came back green; review still found three real bugs:
+
+| Lane | Bug the agent's tests missed | Why it matters |
+|---|---|---|
+| AL1 | Push to the remote host did not mirror deletions | A file deleted locally came back on the next pull |
+| AL1 | ssh/rsync calls without input inherited the caller's stdin | Run from a pipe or a queue, every probe hung until timeout ("flaky" tests), and real ssh can swallow input meant for something else |
+| AL2 | No test pinned the allocator's own per-host capacity check | Only a second guard in the queue protected it |
+
+Each fix came with a test; reviewer mutants on the new code: 14 / 14 killed.

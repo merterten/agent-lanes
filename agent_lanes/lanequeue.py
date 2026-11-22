@@ -30,6 +30,7 @@ STATUSES = {
     "failed",
     "skipped-quota",
     "skipped-stop",
+    "skipped-host",
 }
 
 
@@ -109,9 +110,20 @@ def load_queue(path):
                     f"{label} ({lane_for_message}): args must contain only strings"
                 )
 
+        host = item.get("host")
+        if host is not None and (not isinstance(host, str) or not host.strip()):
+            problems.append(f"{label} ({lane_for_message}): host must be a non-empty string")
+            host = None
+        fallback_local = item.get("fallback_local", False)
+        if not isinstance(fallback_local, bool):
+            problems.append(f"{label} ({lane_for_message}): fallback_local must be a boolean")
+            fallback_local = False
+
         if brief_path is not None and isinstance(lane, str) and LANE_RE.fullmatch(lane):
             entries.append(
-                {"lane": lane, "brief": brief_path, "args": list(args)}
+                {"lane": lane, "brief": brief_path, "args": list(args),
+                 "host": host.strip() if isinstance(host, str) else None,
+                 "fallback_local": fallback_local}
             )
 
     for lane, indexes in seen.items():
@@ -219,6 +231,76 @@ def _build_state(order, records):
     return data
 
 
+class HostAllocator:
+    """Pick a host for a lane using per-host capacities and a reachability probe.
+
+    ``probe(name) -> bool`` is cached while a host succeeds; a failed host is
+    probed again on the next assignment attempt, so a machine that comes back
+    can start receiving lanes without restarting the queue.
+    """
+
+    def __init__(self, capacities, probe=None, remote_order=None):
+        self.capacities = {str(name): int(value) for name, value in capacities.items()}
+        self.probe = probe
+        self.remote_order = [name for name in (remote_order or []) if name != "local"]
+        for name in self.capacities:
+            if name != "local" and name not in self.remote_order:
+                self.remote_order.append(name)
+        self._reachable = set()
+        self._failed = set()
+
+    def prime(self):
+        """Probe every remote host with capacity once before the first lane."""
+        for name in self.remote_order:
+            if self.capacities.get(name, 0) > 0:
+                self.is_reachable(name)
+
+    def is_reachable(self, name):
+        if name == "local":
+            return True
+        if name in self._reachable:
+            return True
+        if self.probe is None:
+            self._reachable.add(name)
+            return True
+        try:
+            ok = bool(self.probe(name))
+        except Exception:
+            ok = False
+        if ok:
+            self._reachable.add(name)
+            self._failed.discard(name)
+        else:
+            self._failed.add(name)
+        return ok
+
+    def __call__(self, lane, record, usage):
+        pinned = record.get("host")
+        fallback_local = bool(record.get("fallback_local"))
+
+        def free(name):
+            return self.capacities.get(name, 0) - usage.get(name, 0)
+
+        if pinned:
+            if pinned == "local":
+                return "local" if free("local") > 0 else None
+            if pinned in self.capacities and free(pinned) > 0 and self.is_reachable(pinned):
+                return pinned
+            if fallback_local and free("local") > 0:
+                return "local"
+            return None
+
+        best = None
+        for name in self.remote_order:
+            if name not in self.capacities or free(name) <= 0 or not self.is_reachable(name):
+                continue
+            if best is None or free(name) > free(best):
+                best = name
+        if best is not None:
+            return best
+        return "local" if free("local") > 0 else None
+
+
 def run_queue(
     entries,
     run_fn,
@@ -227,6 +309,8 @@ def run_queue(
     poll=1.0,
     stop_patterns=None,
     on_change=None,
+    assign=None,
+    capacities=None,
 ):
     if state_path is None:
         raise ValueError("state_path is required")
@@ -238,6 +322,21 @@ def run_queue(
         raise ValueError("max_parallel must be an integer") from exc
     if max_parallel < 1:
         raise ValueError("max_parallel must be at least 1")
+
+    if capacities is None:
+        capacities = {"local": max_parallel}
+    else:
+        if not isinstance(capacities, dict):
+            raise ValueError("capacities must be a mapping of host to capacity")
+        try:
+            capacities = {str(name): int(value) for name, value in capacities.items()}
+        except (TypeError, ValueError) as exc:
+            raise ValueError("capacities values must be integers") from exc
+        if any(value < 0 for value in capacities.values()):
+            raise ValueError("capacities must be zero or more")
+    host_aware = assign is not None
+    if assign is None:
+        assign = HostAllocator(capacities)
 
     state_path = Path(state_path)
     stop_file = state_path.parent / "STOP"
@@ -275,6 +374,8 @@ def run_queue(
             "lane": lane,
             "brief": brief,
             "args": list(args),
+            "host": item.get("host"),
+            "fallback_local": bool(item.get("fallback_local", False)),
             "status": "pending",
             "rc": None,
             "log": None,
@@ -289,6 +390,7 @@ def run_queue(
             record["log"] = old.get("log")
             record["started"] = old.get("started")
             record["ended"] = old.get("ended")
+            record["host"] = old.get("host", item.get("host"))
         elif old_status == "running":
             record["restarted"] = True
         elif old_status in STATUSES:
@@ -321,8 +423,13 @@ def run_queue(
 
     write(list(order))
 
-    executor = concurrent.futures.ThreadPoolExecutor(max_workers=max_parallel)
+    if isinstance(assign, HostAllocator):
+        assign.prime()
+
+    workers = max(1, sum(capacities.values()))
+    executor = concurrent.futures.ThreadPoolExecutor(max_workers=workers)
     active = {}
+    usage = {name: 0 for name in capacities}
     stop_reason = None
     quota_stop = False
 
@@ -347,6 +454,9 @@ def run_queue(
                     rc = 1
 
                 record = records[lane]
+                host = record.get("host")
+                if host in usage and usage[host] > 0:
+                    usage[host] -= 1
                 record["rc"] = rc
                 record["log"] = str(log_path) if log_path is not None else None
                 record["ended"] = _now()
@@ -379,34 +489,57 @@ def run_queue(
                     stop_reason,
                 )
 
-            while stop_reason is None and len(active) < max_parallel:
+            while stop_reason is None:
                 waiting = pending_lanes()
                 if not waiting:
                     break
-                lane = waiting[0]
-                record = records[lane]
-                record["status"] = "running"
-                record["rc"] = None
-                record["log"] = None
-                record["started"] = _now()
-                record["ended"] = None
-                write([lane])
-                future = executor.submit(
-                    run_fn,
-                    lane,
-                    record["brief"],
-                    list(record["args"]),
-                )
-                active[future] = lane
+                started_one = False
+                for lane in waiting:
+                    record = records[lane]
+                    try:
+                        host = assign(lane, record, usage)
+                    except Exception:
+                        host = None
+                    if host not in capacities or usage.get(host, 0) >= capacities[host]:
+                        continue
+                    record["status"] = "running"
+                    record["host"] = host
+                    record["rc"] = None
+                    record["log"] = None
+                    record["started"] = _now()
+                    record["ended"] = None
+                    usage[host] = usage.get(host, 0) + 1
+                    write([lane])
+                    if host_aware:
+                        future = executor.submit(
+                            run_fn,
+                            lane,
+                            record["brief"],
+                            list(record["args"]),
+                            host,
+                        )
+                    else:
+                        future = executor.submit(
+                            run_fn,
+                            lane,
+                            record["brief"],
+                            list(record["args"]),
+                        )
+                    active[future] = lane
+                    started_one = True
+                    break
+                if not started_one:
+                    break
 
             if not active:
                 if not pending_lanes():
                     break
                 if stop_reason is not None:
                     continue
-                if len(active) >= max_parallel:
-                    continue
-                continue
+                # Nothing running and nothing could be placed: pinned hosts are
+                # unreachable or every candidate is invalid. Do not spin.
+                skip_pending("skipped-host", "no reachable host with free capacity")
+                break
 
             concurrent.futures.wait(
                 list(active),
@@ -423,7 +556,7 @@ def run_queue(
             counts["done"] += 1
         elif status == "failed":
             counts["failed"] += 1
-        elif status in ("skipped-quota", "skipped-stop"):
+        elif status in ("skipped-quota", "skipped-stop", "skipped-host"):
             counts["skipped"] += 1
 
     return {

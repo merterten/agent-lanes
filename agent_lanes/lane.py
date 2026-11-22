@@ -828,13 +828,16 @@ def cmd_hosts(args):
         print(f"no hosts configured in {remote.hosts_path()}")
         return 0
     lanes = load_ledger().get("lanes", {})
-    rows = [("HOST", "SSH", "REACHABLE", "RUNNING", "MAX")]
+    rows = [("HOST", "SSH", "REACHABLE", "RUNNING", "USED", "FREE", "MAX")]
     for name in sorted(hosts):
         host = hosts[name]
         reachable = "yes" if remote.probe(host) else "no"
         running = sorted(lane for lane, entry in lanes.items()
                          if entry.get("where") == name and entry.get("status") == "running")
-        rows.append((name, host.ssh, reachable, ",".join(running) or "-", str(host.max_lanes)))
+        used = len(running)
+        free = max(0, host.max_lanes - used)
+        rows.append((name, host.ssh, reachable, ",".join(running) or "-", str(used),
+                     str(free), str(host.max_lanes)))
     widths = [max(len(row[i]) for row in rows) for i in range(len(rows[0]))]
     for row in rows:
         print("  ".join(value.ljust(widths[i]) for i, value in enumerate(row)).rstrip())
@@ -1270,11 +1273,47 @@ def cmd_queue(args):
     state_path = Path(args.state) if args.state else qdir / (Path(args.queue_file).stem + ".state.json")
     me = [sys.executable, str(Path(__file__).resolve())]
 
-    def run_fn(lane, brief, extra):
+    capacities = None
+    assign = None
+    names = []
+    if args.hosts:
+        names = [name.strip() for name in args.hosts.split(",") if name.strip()]
+        if not names:
+            print("refused: --hosts is empty")
+            return 2
+        try:
+            configured = remote.load_hosts()
+        except remote.HostError as exc:
+            print(f"refused: {exc}")
+            return 1
+        unknown = [name for name in names if name != "local" and name not in configured]
+        if unknown:
+            print(f"refused: unknown host(s): {', '.join(unknown)} (add them to "
+                  f"{remote.hosts_path()})")
+            return 1
+        capacities = {"local": args.max}
+        for name in names:
+            if name != "local":
+                capacities[name] = configured[name].max_lanes
+        host_map = {name: configured[name] for name in configured}
+
+        def probe(name):
+            return True if name == "local" else remote.probe(host_map[name])
+
+        assign = lq.HostAllocator(
+            capacities, probe=probe,
+            remote_order=[name for name in names if name != "local"],
+        )
+
+    def run_fn(lane, brief, extra, host="local"):
         outer = lane_dir(lane) / "queue-run.log"
         outer.parent.mkdir(parents=True, exist_ok=True)
+        command = me + ["run", lane, brief]
+        if host and host != "local":
+            command += ["--host", host]
+        command += list(extra)
         with open(outer, "wb") as fh:
-            rc = subprocess.run(me + ["run", lane, brief] + list(extra), stdout=fh,
+            rc = subprocess.run(command, stdout=fh,
                                 stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL).returncode
         # scan the WORKER log for quota / rate-limit messages, not just our summary
         worker_log = load_ledger().get("lanes", {}).get(lane, {}).get("log")
@@ -1283,11 +1322,13 @@ def cmd_queue(args):
         return rc, str(outer)
 
     def report(record):
-        print(f"{record.get('lane')}: {record.get('status')} rc={record.get('rc')}", flush=True)
+        where = f" @{record.get('host')}" if record.get("host") else ""
+        print(f"{record.get('lane')}: {record.get('status')} rc={record.get('rc')}{where}",
+              flush=True)
 
     print(f"queue state: {state_path}  (touch {state_path.parent / 'STOP'} to stop new starts)")
     summary = lq.run_queue(entries, run_fn, max_parallel=args.max, state_path=state_path,
-                           poll=1.0, on_change=report)
+                           poll=1.0, on_change=report, assign=assign, capacities=capacities)
     print(json.dumps(summary, sort_keys=True))
     return 0 if not (summary["failed"] or summary["skipped"]) else 1
 
@@ -1422,7 +1463,10 @@ def build_parser():
 
     p = sub.add_parser("queue", help="run lanes from a JSON list, max N at once, stop on quota")
     p.add_argument("queue_file")
-    p.add_argument("--max", type=int, default=5)
+    p.add_argument("--max", type=int, default=5,
+                   help="local capacity (default 5); remote capacity comes from hosts.toml")
+    p.add_argument("--hosts", metavar="LIST",
+                   help="spread lanes over these hosts: local,gpu-box,laptop")
     p.add_argument("--state")
     p.set_defaults(func=cmd_queue)
 
