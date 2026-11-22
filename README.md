@@ -120,6 +120,14 @@ probes are retried, and unreachable hosts get no new lanes. See
 [docs/multi-machine.md](docs/multi-machine.md) for `hosts.toml`, ssh/WSL
 setup, remote checks, Windows notes, secret excludes and troubleshooting.
 
+## Watching lanes from a phone: Tailscale + herdr + Heeler
+
+We run lanes on two machines and watch them from a phone: Tailscale as the private network, herdr as the
+terminal workspace server (one tab per lane worker), and Heeler as the phone client with a push when a lane
+finishes. [docs/remote-watching.md](docs/remote-watching.md) collects the observations: closing sshd to the
+tailnet, WSL jump hosts and linger, why remote lanes need `systemd --user`, keeping the herdr socket out of
+worker sandboxes, and Heeler's exclusive live attach.
+
 ## Safety rules the tool enforces
 
 - Nothing in an agent's result file is ever executed. Test commands come from the reviewer.
