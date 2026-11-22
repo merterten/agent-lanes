@@ -14,16 +14,12 @@ import lane  # noqa: E402
 WORKERS = ROOT / "docs" / "workers.md"
 README = ROOT / "README.md"
 
-BANNED = (
-    "openwrt",
-    "router",
-    "v4-pro",
-    "deepseek-v4-pro",
-    "pro model",
-    "trading",
-    "@gmail",
-    "/home/",
-)
+# Generic leaks only. Project-specific words live in an untracked file, one per line (.docs-banned in the repo
+# root, git-ignored), so the public repo does not name what it is keeping out.
+BANNED = ("@gmail", "/home/")
+_EXTRA = ROOT / ".docs-banned"
+if _EXTRA.exists():
+    BANNED += tuple(w.strip().lower() for w in _EXTRA.read_text(encoding="utf-8").splitlines() if w.strip())
 IPV4 = re.compile(r"(?<![\w.])(?:\d{1,3}\.){3}\d{1,3}(?![\w.])")
 MARKDOWN_LINK = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 
