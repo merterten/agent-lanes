@@ -17,16 +17,17 @@ import fcntl
 import json
 import os
 import re
-import shlex
 import shutil
 import subprocess
 import sys
 import time
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import remote  # noqa: E402
+
 DEFAULT_ROOT = "~/agent-lanes"
 LANE_RE = re.compile(r"^(cc|oc)-worker-[0-9]{1,3}$")
-LAPTOP_LANE_RE = re.compile(r"^oc-worker-[0-9]{2}$")
 VALID_STATUSES = ("created", "running", "returned", "no-result", "accept-pass",
                   "accept-fail", "merged", "rejected", "removed")
 RESULT_STATUSES = ("done", "partial", "blocked")
@@ -36,7 +37,6 @@ ALLOWED_IGNORED = frozenset({"bin", "obj", "__pycache__", ".pytest_cache", ".lan
 SUMMARY_TAIL_LINES = 15
 # ledger states that mean "someone is still working on / judging this lane": gc never removes these
 OPEN_STATUSES = frozenset({"created", "running", "returned", "no-result", "accept-pass", "accept-fail"})
-DEFAULT_LAPTOP_PROBE = "ssh -o ConnectTimeout=5 -o BatchMode=yes laptop exit 0"
 UNREACHABLE = "unreachable"
 
 
@@ -97,23 +97,6 @@ def cc_bin():
 
 def worker_bin(worker):
     return oc_bin() if worker == "oc-worker" else cc_bin()
-
-
-def laptop_bin():
-    return os.environ.get("LANE_LAPTOP_BIN") or "oc-laptop"
-
-
-def laptop_probe_argv():
-    return shlex.split(os.environ.get("LANE_LAPTOP_PROBE") or DEFAULT_LAPTOP_PROBE)
-
-
-def laptop_reachable(timeout=15):
-    """True when the laptop answers within a few seconds (some networks block it)."""
-    try:
-        proc = subprocess.run(laptop_probe_argv(), capture_output=True, timeout=timeout)
-    except (OSError, subprocess.TimeoutExpired):
-        return False
-    return proc.returncode == 0
 
 
 # ---------------------------------------------------------------------------
@@ -516,9 +499,41 @@ def cmd_run(args):
     if args.luxalgo and worker != "oc-worker":
         print("refused: --luxalgo is only valid for oc-worker")
         return 1
-    if args.laptop and not LAPTOP_LANE_RE.match(lane):
-        print("refused: --laptop needs an oc-worker-NN lane with exactly two digits")
-        return 1
+
+    if args.laptop:
+        if args.host and args.host != "laptop":
+            print("refused: --laptop is an alias for --host laptop; do not pass both")
+            return 1
+        args.host = "laptop"
+        print("note: --laptop is deprecated; use --host laptop instead")
+    if args.laptop_or_local:
+        args.host_or_local = True
+
+    host = None
+    if args.host:
+        try:
+            host = remote.get_host(args.host)
+        except remote.HostError as exc:
+            print(f"refused: {exc}")
+            return 1
+        if not remote.probe(host):
+            if args.host_or_local:
+                print(f"host {args.host} unreachable: running this lane locally instead "
+                      "(--host-or-local)")
+                host = None
+            else:
+                print(f"refused: host {args.host} unreachable (ssh probe failed). Nothing was "
+                      "started. Use --host-or-local to run here, or retry from a network that "
+                      f"reaches {args.host}.")
+                return 3
+        else:
+            running = [name for name, item in load_ledger().get("lanes", {}).items()
+                       if name != lane and item.get("where") == host.name
+                       and item.get("status") == "running"]
+            if len(running) >= host.max_lanes:
+                print(f"refused: host {host.name} already has {len(running)} running lanes "
+                      f"(max_lanes={host.max_lanes})")
+                return 1
 
     worktree = worktree_path(lane)
     if not worktree.is_dir():
@@ -529,15 +544,6 @@ def cmd_run(args):
         print(f"refused: brief file not found: {brief}")
         return 1
     brief_text = brief.read_text(encoding="utf-8")
-
-    if args.laptop and not laptop_reachable():
-        if args.laptop_or_local:
-            print("laptop unreachable: running this lane locally instead (--laptop-or-local)")
-            args.laptop = False
-        else:
-            print("refused: laptop unreachable (ssh probe failed). Nothing was started. "
-                  "Use --laptop-or-local to run here, or retry from a network that reaches the laptop.")
-            return 3
 
     entry = load_ledger().get("lanes", {}).get(lane, {})
     base = entry.get("base") or head_sha(worktree)
@@ -550,7 +556,7 @@ def cmd_run(args):
     task_file = unique_path(out_dir / f"task-{stamp}.txt")
     task_file.write_text(task, encoding="utf-8")
     log_path = unique_path(out_dir / f"run-{stamp}.log")
-    where = "laptop" if args.laptop else "local"
+    where = host.name if host else "local"
 
     def started(lanes):
         fields = {"status": "running", "worker": worker, "where": where,
@@ -561,22 +567,29 @@ def cmd_run(args):
 
     mutate_ledger(started)
 
-    rc = _execute_run(args, lane, worker, worktree, task, log_path)
+    if host is None:
+        rc = _execute_local(args, worker, worktree, task, log_path)
+    else:
+        rc = _execute_remote(args, host, lane, worker, worktree, task, log_path)
 
     if rc == UNREACHABLE:
+        label = host.name if host else "local"
+
         def lost(lanes):
             update_entry(lanes, lane, status="running",
-                         note="laptop unreachable while waiting; lane may still run there - `lane collect` later")
+                         note=f"{label} unreachable while waiting; lane may still run there "
+                              "- `lane collect` later")
+
         mutate_ledger(lost)
         print(f"lane: {lane}")
-        print("laptop became unreachable while waiting; the lane may still be running there.")
-        print(f"run `lane collect {lane}` from a network that reaches the laptop")
+        print(f"{label} became unreachable while waiting; the lane may still be running there.")
+        print(f"run `lane collect {lane}` from a network that reaches {label}")
         print(f"log: {log_path}")
         return 3
 
-    if args.laptop and args.no_wait:
+    if host is not None and args.no_wait:
         print(f"lane: {lane}")
-        print("started on laptop (no-wait); result not collected")
+        print(f"started on {host.name} (no-wait); result not collected")
         print(f"log: {log_path}")
         return 0
 
@@ -599,42 +612,63 @@ def cmd_run(args):
     return 0 if result is not None else 1
 
 
-def _execute_run(args, lane, worker, worktree, task, log_path):
-    if not args.laptop:
-        argv = [worker_bin(worker)]
-        if args.luxalgo:
-            argv.append("--luxalgo")
-        argv.append("--write")
-        if args.model:
-            argv += ["-m", args.model]
-        argv.append(task)
-        try:
-            with open(log_path, "wb") as fh:
-                proc = subprocess.run(argv, cwd=str(worktree), stdout=fh, stderr=subprocess.STDOUT)
-            return proc.returncode
-        except OSError as exc:
-            _append(log_path, f"failed to start {argv[0]}: {exc}\n")
-            return 127
-
-    number = lane_number(lane)
-    binary = laptop_bin()
-    run_argv = [binary, "run", number]
+def _execute_local(args, worker, worktree, task, log_path):
+    argv = [worker_bin(worker)]
+    if args.luxalgo:
+        argv.append("--luxalgo")
+    argv.append("--write")
     if args.model:
-        run_argv += ["-m", args.model]
+        argv += ["-m", args.model]
+    argv.append(task)
     try:
-        with open(log_path, "ab") as fh:
-            pushed = subprocess.run([binary, "push", number], cwd=str(worktree),
-                                    stdout=fh, stderr=subprocess.STDOUT)
-            if pushed.returncode != 0:
-                _append(log_path, f"\nlane: {binary} push failed rc={pushed.returncode}; not started\n")
-                return 126
-            started = subprocess.run(run_argv, cwd=str(worktree), input=task.encode("utf-8"),
-                                     stdout=fh, stderr=subprocess.STDOUT)
-            if started.returncode != 0:
-                _append(log_path, f"\nlane: {binary} run failed rc={started.returncode}\n")
-                return 126
+        with open(log_path, "wb") as fh:
+            proc = subprocess.run(argv, cwd=str(worktree), stdout=fh, stderr=subprocess.STDOUT)
+        return proc.returncode
     except OSError as exc:
-        _append(log_path, f"failed to start {binary}: {exc}\n")
+        _append(log_path, f"failed to start {argv[0]}: {exc}\n")
+        return 127
+
+
+def _execute_remote(args, host, lane, worker, worktree, task, log_path):
+    remote_worker = host.effective_worker(worker_bin(worker))
+    env = {
+        "LANE_WORKER": remote_worker,
+        "LANE_NICE": str(host.nice),
+    }
+    if args.model:
+        env["LANE_MODEL"] = args.model
+    if args.luxalgo:
+        env["LANE_LUXALGO"] = "1"
+    try:
+        prepared = remote.prepare(host, lane)
+        if prepared.returncode != 0:
+            _append(log_path, f"remote prepare failed rc={prepared.returncode}: "
+                              f"{(prepared.stderr or '').strip()}\n")
+            return 126
+        with open(log_path, "ab") as fh:
+            pushed = subprocess.run(remote.push_argv(host, worktree, lane), stdin=subprocess.DEVNULL,
+                                    stdout=fh, stderr=subprocess.STDOUT)
+        if pushed.returncode != 0:
+            _append(log_path, f"\nlane: rsync push to {host.name} failed rc={pushed.returncode}; "
+                              "not started\n")
+            return 126
+        cleaned = remote.clean_lane(host, lane)
+        if cleaned.returncode != 0:
+            _append(log_path, f"\nlane: cannot clear stale remote result rc={cleaned.returncode}\n")
+            return 126
+        stubbed = remote.stub(host, lane)
+        if stubbed.returncode != 0:
+            _append(log_path, f"\nlane: remote stub failed rc={stubbed.returncode}\n")
+            return 126
+        started = subprocess.run(remote.runner_ssh_argv(host, "run", lane, env=env),
+                                 input=task, capture_output=True, text=True, timeout=120)
+        with open(log_path, "a", encoding="utf-8") as fh:
+            fh.write((started.stdout or "") + (started.stderr or ""))
+        if started.returncode != 0:
+            _append(log_path, f"\nlane: remote run failed rc={started.returncode}\n")
+            return 126
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        _append(log_path, f"remote start failed: {exc}\n")
         return 127
 
     if args.no_wait:
@@ -645,7 +679,7 @@ def _execute_run(args, lane, worker, worktree, task, log_path):
     try:
         while True:
             try:
-                proc = subprocess.run([binary, "status", number], cwd=str(worktree),
+                proc = subprocess.run(remote.runner_ssh_argv(host, "status", lane), stdin=subprocess.DEVNULL,
                                       capture_output=True, text=True, timeout=120)
                 output = (proc.stdout or "") + (proc.stderr or "")
                 ok = proc.returncode == 0
@@ -658,17 +692,22 @@ def _execute_run(args, lane, worker, worktree, task, log_path):
                 break
             failures = 0 if ok else failures + 1
             if failures >= args.max_poll_failures:
-                _append(log_path, f"\nlane: {failures} failed status polls in a row: laptop unreachable\n")
+                _append(log_path, f"\nlane: {failures} failed status polls in a row: "
+                                  f"{host.name} unreachable\n")
                 return UNREACHABLE
             time.sleep(args.poll)
+        deletions = remote.find_deletions(host, worktree, lane)
+        for path in deletions:
+            _append(log_path, f"warning: {host.name} deleted {path}; kept the local copy\n")
+            print(f"warning: {host.name} deleted {path}; kept the local copy")
         with open(log_path, "ab") as fh:
-            pulled = subprocess.run([binary, "pull", number], cwd=str(worktree),
+            pulled = subprocess.run(remote.pull_argv(host, worktree, lane), stdin=subprocess.DEVNULL,
                                     stdout=fh, stderr=subprocess.STDOUT)
         if pulled.returncode != 0:
-            _append(log_path, f"\nlane: {binary} pull failed rc={pulled.returncode}\n")
+            _append(log_path, f"\nlane: rsync pull from {host.name} failed rc={pulled.returncode}\n")
             return UNREACHABLE
     except OSError as exc:
-        _append(log_path, f"laptop polling failed: {exc}\n")
+        _append(log_path, f"remote polling failed: {exc}\n")
         return 127
     return rc
 
@@ -687,27 +726,37 @@ def cmd_collect(args):
     log_value = entry.get("log")
     log_path = Path(log_value) if log_value else None
     rc = entry.get("rc")
-    if where == "laptop":
-        number = lane_number(lane)
-        binary = laptop_bin()
-        if not laptop_reachable():
-            print("laptop unreachable (ssh probe failed): nothing collected; retry from a network that reaches it")
+    if where and where != "local":
+        try:
+            host = remote.get_host(where)
+        except remote.HostError as exc:
+            print(f"refused: {exc}")
+            return 1
+        if not remote.probe(host):
+            print(f"{where} unreachable (ssh probe failed): nothing collected; retry from a "
+                  "network that reaches it")
             return 3
-        state = subprocess.run([binary, "status", number], cwd=str(worktree), capture_output=True, text=True)
-        match = re.search(r"END rc=(-?\d+)", (state.stdout or "") + (state.stderr or ""))
+        state = subprocess.run(remote.runner_ssh_argv(host, "status", lane), stdin=subprocess.DEVNULL,
+                               capture_output=True, text=True)
+        output = (state.stdout or "") + (state.stderr or "")
+        match = re.search(r"END rc=(-?\d+)", output)
         if not match:
-            print(f"{lane} is still running on the laptop (no END line yet); collect again later")
+            print(f"{lane} is still running on {where} (no END line yet); collect again later")
             return 3
         rc = int(match.group(1))
-        argv = [binary, "pull", number]
+        for path in remote.find_deletions(host, worktree, lane):
+            print(f"warning: {where} deleted {path}; kept the local copy")
+            if log_path:
+                _append(log_path, f"warning: {where} deleted {path}; kept the local copy\n")
+        argv = remote.pull_argv(host, worktree, lane)
         try:
             if log_path:
                 with open(log_path, "ab") as fh:
-                    subprocess.run(argv, cwd=str(worktree), stdout=fh, stderr=subprocess.STDOUT)
+                    subprocess.run(argv, stdout=fh, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL)
             else:
-                subprocess.run(argv, cwd=str(worktree), capture_output=True)
+                subprocess.run(argv, capture_output=True, stdin=subprocess.DEVNULL)
         except OSError as exc:
-            print(f"refused: cannot run {binary} pull: {exc}")
+            print(f"refused: cannot run rsync pull: {exc}")
             return 1
     base = entry.get("base") or head_sha(worktree)
     result, problems = validate_result(worktree, lane, base)
@@ -729,6 +778,112 @@ def cmd_collect(args):
     mutate_ledger(fn)
     print_summary(lane, rc, result, problems, log_path)
     return 0 if result is not None else 1
+
+
+def cmd_stop(args):
+    lane = args.lane
+    if not valid_lane(lane):
+        print(f"invalid lane name: {lane!r}")
+        return 1
+    entry = load_ledger().get("lanes", {}).get(lane, {})
+    where = entry.get("where", "local")
+    if not where or where == "local":
+        print(f"refused: {lane} is not a remote lane")
+        return 1
+    try:
+        host = remote.get_host(where)
+    except remote.HostError as exc:
+        print(f"refused: {exc}")
+        return 1
+    if not remote.probe(host):
+        print(f"refused: {where} unreachable (ssh probe failed); nothing was stopped")
+        return 3
+    try:
+        proc = remote.stop(host, lane)
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        print(f"refused: cannot stop {lane} on {where}: {exc}")
+        return 1
+    output = ((proc.stdout or "") + (proc.stderr or "")).strip()
+    if output:
+        print(output)
+    if proc.returncode != 0:
+        print(f"stop failed on {where} rc={proc.returncode}")
+        return 1
+
+    def fn(lanes):
+        update_entry(lanes, lane, note=f"stopped on {where} by `lane stop`")
+
+    mutate_ledger(fn)
+    print(f"stopped {lane} on {where}")
+    return 0
+
+
+def cmd_hosts(args):
+    try:
+        hosts = remote.load_hosts()
+    except remote.HostError as exc:
+        print(f"refused: {exc}")
+        return 1
+    if not hosts:
+        print(f"no hosts configured in {remote.hosts_path()}")
+        return 0
+    lanes = load_ledger().get("lanes", {})
+    rows = [("HOST", "SSH", "REACHABLE", "RUNNING", "MAX")]
+    for name in sorted(hosts):
+        host = hosts[name]
+        reachable = "yes" if remote.probe(host) else "no"
+        running = sorted(lane for lane, entry in lanes.items()
+                         if entry.get("where") == name and entry.get("status") == "running")
+        rows.append((name, host.ssh, reachable, ",".join(running) or "-", str(host.max_lanes)))
+    widths = [max(len(row[i]) for row in rows) for i in range(len(rows[0]))]
+    for row in rows:
+        print("  ".join(value.ljust(widths[i]) for i, value in enumerate(row)).rstrip())
+    return 0
+
+
+def cmd_host_check(args):
+    try:
+        host = remote.get_host(args.name)
+    except remote.HostError as exc:
+        print(f"refused: {exc}")
+        return 1
+    rows = remote.check_host(host, host.effective_worker(oc_bin()))
+    failures = 0
+    for row in rows:
+        result = "PASS" if row["ok"] else "FAIL"
+        if not row["ok"] and row["check"] != "systemd":
+            failures += 1
+        print(f"{row['check']:<12} {result:<5} {row['detail']}")
+        if not row["ok"]:
+            print(f"  fix: {row['hint']}")
+        warning = row.get("warning")
+        if warning:
+            print(f"  WARN: {warning}")
+    return 0 if failures == 0 else 1
+
+
+def cmd_host_setup(args):
+    try:
+        host = remote.get_host(args.name)
+    except remote.HostError as exc:
+        print(f"refused: {exc}")
+        return 1
+    if not remote.probe(host):
+        print(f"refused: {args.name} unreachable (ssh probe failed); nothing was copied")
+        return 3
+    try:
+        proc = remote.setup(host)
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        print(f"refused: cannot copy remote runner: {exc}")
+        return 1
+    output = ((proc.stdout or "") + (proc.stderr or "")).strip()
+    if output:
+        print(output)
+    if proc.returncode != 0:
+        print(f"setup failed on {args.name} rc={proc.returncode}")
+        return 1
+    print(f"installed {remote.runner_path(host)} on {args.name}")
+    return 0
 
 
 def cmd_set(args):
@@ -1206,18 +1361,38 @@ def build_parser():
     p.add_argument("--worker", choices=("oc", "cc"))
     p.add_argument("--luxalgo", action="store_true")
     p.add_argument("-m", "--model")
-    p.add_argument("--laptop", action="store_true")
+    p.add_argument("--host", metavar="NAME",
+                   help="run on a host from ~/.config/agent-lanes/hosts.toml")
+    p.add_argument("--host-or-local", dest="host_or_local", action="store_true",
+                   help="with --host: run here when the host cannot be reached")
+    p.add_argument("--laptop", action="store_true", help=argparse.SUPPRESS)
+    p.add_argument("--laptop-or-local", dest="laptop_or_local", action="store_true",
+                   help=argparse.SUPPRESS)
     p.add_argument("--no-wait", dest="no_wait", action="store_true")
     p.add_argument("--poll", type=float, default=60)
-    p.add_argument("--laptop-or-local", dest="laptop_or_local", action="store_true",
-                   help="with --laptop: run here when the laptop cannot be reached")
     p.add_argument("--max-poll-failures", dest="max_poll_failures", type=int, default=10,
-                   help="stop waiting after this many failed status polls in a row (laptop lost)")
+                   help="stop waiting after this many failed status polls in a row (host lost)")
     p.set_defaults(func=cmd_run)
 
     p = sub.add_parser("collect", help="collect and validate a lane result")
     p.add_argument("lane")
     p.set_defaults(func=cmd_collect)
+
+    p = sub.add_parser("stop", help="stop a remote lane")
+    p.add_argument("lane")
+    p.set_defaults(func=cmd_stop)
+
+    p = sub.add_parser("hosts", help="list configured remote hosts")
+    p.set_defaults(func=cmd_hosts)
+
+    p = sub.add_parser("host", help="check or set up a remote host")
+    hosts_sub = p.add_subparsers(dest="host_command", required=True)
+    hp = hosts_sub.add_parser("check", help="check ssh, rsync, worker and root")
+    hp.add_argument("name")
+    hp.set_defaults(func=cmd_host_check)
+    hp = hosts_sub.add_parser("setup", help="install remote_runner.sh on a host")
+    hp.add_argument("name")
+    hp.set_defaults(func=cmd_host_setup)
 
     p = sub.add_parser("set", help="set a lane status")
     p.add_argument("lane")

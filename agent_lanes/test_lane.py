@@ -26,8 +26,10 @@ import lane  # noqa: E402
 
 ENV_KEYS = (
     "LANE_ROOT", "LANE_MAIN_REPO", "LANE_WORKTREES", "LANE_STATE_DIR",
-    "LANE_OC_BIN", "LANE_CC_BIN", "LANE_LAPTOP_BIN",
-    "FAKE_LAPTOP_LOG", "FAKE_LAPTOP_STDIN", "LANE_LAPTOP_PROBE", "LANE_PROC",
+    "LANE_OC_BIN", "LANE_CC_BIN", "LANE_HOSTS", "LANE_SSH", "LANE_RSYNC",
+    "FAKE_SSH_LOG", "FAKE_SSH_FAIL", "FAKE_SSH_REMOTE_PATH",
+    "FAKE_RSYNC_LOG", "FAKE_RSYNC_FAIL", "FAKE_RSYNC_DELETIONS", "LANE_PROC",
+    "LANE_NO_SYSTEMD",
 )
 
 VALID_WORKER = textwrap.dedent('''
@@ -59,46 +61,72 @@ MISSING_WORKER = textwrap.dedent('''
     sys.exit(0)
 ''')
 
-LAPTOP = textwrap.dedent('''
-    import json, os, sys
-    cmd = sys.argv[1]
-    nn = sys.argv[2]
-    with open(os.environ["FAKE_LAPTOP_LOG"], "a") as fh:
-        fh.write(cmd + " " + nn + "\\n")
-    if cmd == "push":
-        sys.exit(0)
-    if cmd == "run":
-        data = sys.stdin.read()
-        with open(os.environ["FAKE_LAPTOP_STDIN"], "w") as fh:
-            fh.write(data)
-        sys.exit(0)
-    if cmd == "status":
-        print("working")
-        print("END rc=0")
-        sys.exit(0)
-    if cmd == "pull":
-        wt = os.getcwd()
-        lane_name = os.path.basename(wt)
-        with open(os.path.join(wt, "change.txt"), "w") as fh:
-            fh.write("x\\n")
-        os.makedirs(os.path.join(wt, ".lane"), exist_ok=True)
-        result = {
-            "lane": lane_name,
-            "status": "done",
-            "summary": "from laptop",
-            "files_changed": ["change.txt"],
-            "tests": [{"cmd": "true", "passed": 1, "failed": 0}],
-            "claims": [],
-            "blockers": [],
-        }
-        with open(os.path.join(wt, ".lane", "LANE_RESULT.json"), "w") as fh:
-            json.dump(result, fh)
-        with open(os.path.join(wt, ".lane", "REPORT.md"), "w") as fh:
-            fh.write("ok\\n")
-        sys.exit(0)
-    sys.exit(3)
+FAKE_SSH = textwrap.dedent('''
+    import json, os, subprocess, sys
+    args = sys.argv[1:]
+    log = os.environ.get("FAKE_SSH_LOG")
+    if log:
+        with open(log, "a") as fh:
+            fh.write(json.dumps(args) + "\\n")
+    cmd = args[-1] if args else "true"
+    fail = os.environ.get("FAKE_SSH_FAIL", "")
+    if fail == "always" or (fail == "status" and "status" in cmd) or (fail == "run" and " run " in cmd):
+        sys.stderr.write("fake ssh: connection lost\\n")
+        sys.exit(255)
+    data = sys.stdin.buffer.read()
+    env = dict(os.environ)
+    if os.environ.get("FAKE_SSH_REMOTE_PATH"):
+        env["PATH"] = os.environ["FAKE_SSH_REMOTE_PATH"]
+    proc = subprocess.run(cmd, shell=True, input=data, env=env, capture_output=True)
+    sys.stdout.buffer.write(proc.stdout)
+    sys.stderr.buffer.write(proc.stderr)
+    sys.exit(proc.returncode)
 ''')
 
+FAKE_RSYNC = textwrap.dedent('''
+    import fnmatch, json, os, shutil, sys
+    args = sys.argv[1:]
+    log = os.environ.get("FAKE_RSYNC_LOG")
+    if log:
+        with open(log, "a") as fh:
+            fh.write(json.dumps(args) + "\\n")
+    patterns = [args[i + 1] for i, a in enumerate(args)
+                if a == "--exclude" and i + 1 < len(args)]
+    def remote_path(value):
+        if ":" in value:
+            head, rest = value.split(":", 1)
+            if "/" not in head:
+                return rest
+        return value
+    def ignore(directory, names):
+        out = set()
+        for name in names:
+            for pat in patterns:
+                if fnmatch.fnmatch(name, pat.rstrip("/")):
+                    out.add(name)
+                    break
+        return out
+    def copy(src, dest):
+        src = remote_path(src).rstrip("/")
+        dest = remote_path(dest).rstrip("/")
+        if os.path.isdir(src):
+            shutil.copytree(src, dest, dirs_exist_ok=True, ignore=ignore)
+        else:
+            if any(fnmatch.fnmatch(os.path.basename(src), p.rstrip("/")) for p in patterns):
+                return
+            os.makedirs(os.path.dirname(dest) or ".", exist_ok=True)
+            shutil.copy2(src, dest)
+    if os.environ.get("FAKE_RSYNC_FAIL") == "1":
+        sys.exit(12)
+    if "--dry-run" in args and "--delete" in args:
+        dels = os.environ.get("FAKE_RSYNC_DELETIONS", "")
+        if dels and os.path.exists(dels):
+            for line in open(dels):
+                print("*deleting   " + line.strip())
+        sys.exit(0)
+    if len(args) >= 2:
+        copy(args[-2], args[-1])
+''')
 
 def make_result(**overrides):
     data = {
@@ -122,7 +150,7 @@ class LaneTest(unittest.TestCase):
         for key in ENV_KEYS:
             if key != "LANE_ROOT":
                 os.environ.pop(key, None)
-        os.environ["LANE_LAPTOP_PROBE"] = "true"          # never ssh from tests
+        os.environ["LANE_HOSTS"] = str(self.tmp / "hosts.toml")
         os.environ["LANE_PROC"] = str(self.tmp / "no-proc")  # no busy processes unless a test says so
         self.repo = self.tmp / "repo"
         self.repo.mkdir()
@@ -193,6 +221,57 @@ class LaneTest(unittest.TestCase):
 
     def validate_repo(self):
         return self.repo, lane.head_sha(self.repo)
+
+    def fake_remote(self, fail=None, deletions=None):
+        ssh = self.script("fake-ssh", FAKE_SSH)
+        rsync = self.script("fake-rsync", FAKE_RSYNC)
+        os.environ["LANE_SSH"] = str(ssh)
+        os.environ["LANE_RSYNC"] = str(rsync)
+        os.environ["FAKE_SSH_LOG"] = str(self.tmp / "ssh.log")
+        os.environ["FAKE_RSYNC_LOG"] = str(self.tmp / "rsync.log")
+        if fail:
+            os.environ["FAKE_SSH_FAIL"] = fail
+        if deletions:
+            path = self.tmp / "deletions.txt"
+            path.write_text("\n".join(deletions) + "\n", encoding="utf-8")
+            os.environ["FAKE_RSYNC_DELETIONS"] = str(path)
+        return ssh, rsync
+
+    def write_hosts(self, name="gpu-box", root=None, worker=None, prefix=None,
+                    rsync_path=None, max_lanes=2, extra=""):
+        root = root or (self.tmp / "remote-root")
+        lines = [f"[hosts.{name}]", 'ssh = "user@203.0.113.10"', f'root = "{root}"',
+                 f"max_lanes = {max_lanes}"]
+        if worker:
+            lines.append(f'worker = "{worker}"')
+        if prefix:
+            lines.append("prefix = [" + ", ".join(json.dumps(p) for p in prefix) + "]")
+        if rsync_path:
+            lines.append(f'rsync_path = "{rsync_path}"')
+        if extra:
+            lines.append(extra)
+        path = Path(os.environ["LANE_HOSTS"])
+        path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        return Path(root)
+
+    def setup_remote(self, root, worker=None):
+        (root / ".agent-lanes").mkdir(parents=True, exist_ok=True)
+        shutil.copy2(lane.remote.runner_local_path(), root / ".agent-lanes" / "remote_runner.sh")
+        (root / ".agent-lanes" / "remote_runner.sh").chmod(0o755)
+        os.environ["LANE_NO_SYSTEMD"] = "1"
+        if worker:
+            os.environ["FAKE_SSH_REMOTE_PATH"] = os.environ.get("PATH", "/usr/bin:/bin")
+        return root
+
+    def ssh_calls(self):
+        path = self.tmp / "ssh.log"
+        return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()] \
+            if path.exists() else []
+
+    def rsync_calls(self):
+        path = self.tmp / "rsync.log"
+        return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()] \
+            if path.exists() else []
 
 
 class TestNew(LaneTest):
@@ -277,34 +356,36 @@ class TestRun(LaneTest):
         self.assertEqual(1, code)
         self.assertIn("--luxalgo", out)
 
-    def test_laptop_needs_two_digit_oc_lane(self):
-        self.make_lane("oc-worker-1")
-        code, out = self.cli("run", "oc-worker-1", str(self.brief()), "--laptop")
-        self.assertEqual(1, code)
-        self.assertIn("--laptop", out)
-        self.make_lane("cc-worker-01")
-        code, out = self.cli("run", "cc-worker-01", str(self.brief()), "--laptop")
-        self.assertEqual(1, code)
-        self.assertIn("--laptop", out)
-
-    def test_laptop_flow_push_run_status_pull(self):
-        laptop = self.script("fake-laptop", LAPTOP)
-        os.environ["LANE_LAPTOP_BIN"] = str(laptop)
-        os.environ["FAKE_LAPTOP_LOG"] = str(self.tmp / "laptop.log")
-        os.environ["FAKE_LAPTOP_STDIN"] = str(self.tmp / "laptop.stdin")
+    def test_host_run_push_run_status_pull(self):
+        worker = self.script("fake-worker", VALID_WORKER)
+        root = self.write_hosts(worker=str(worker))
+        self.fake_remote()
+        self.setup_remote(root)
         worktree = self.make_lane("oc-worker-01")
         code, out = self.cli("run", "oc-worker-01", str(self.brief("write the code\n")),
-                             "--laptop", "--poll", "0")
+                             "--host", "gpu-box", "--poll", "0")
         self.assertEqual(0, code, out)
-        calls = (self.tmp / "laptop.log").read_text(encoding="utf-8").splitlines()
-        self.assertEqual(["push 01", "run 01", "status 01", "pull 01"], calls)
-        task = (self.tmp / "laptop.stdin").read_text(encoding="utf-8")
-        self.assertIn("write the code", task)
-        self.assertIn("oc-worker-01", task)
-        self.assertTrue((worktree / ".lane" / "LANE_RESULT.json").exists())
         entry = lane.load_ledger()["lanes"]["oc-worker-01"]
         self.assertEqual("returned", entry["status"])
-        self.assertEqual("laptop", entry["where"])
+        self.assertEqual("gpu-box", entry["where"])
+        self.assertTrue((worktree / ".lane" / "LANE_RESULT.json").exists())
+        self.assertTrue((worktree / "change.txt").exists())
+        pushes = [call for call in self.rsync_calls() if any(".env*" in part for part in call)]
+        self.assertTrue(pushes, self.rsync_calls())
+        ssh_text = "\n".join(" ".join(call) for call in self.ssh_calls())
+        self.assertIn("remote_runner.sh", ssh_text)
+        self.assertIn("stub", ssh_text)
+
+    def test_laptop_alias_is_deprecated_host_laptop(self):
+        worker = self.script("fake-worker", VALID_WORKER)
+        root = self.write_hosts(name="laptop", worker=str(worker))
+        self.fake_remote()
+        self.setup_remote(root)
+        self.make_lane("oc-worker-01")
+        code, out = self.cli("run", "oc-worker-01", str(self.brief()), "--laptop", "--poll", "0")
+        self.assertEqual(0, code, out)
+        self.assertIn("deprecated", out)
+        self.assertEqual("laptop", lane.load_ledger()["lanes"]["oc-worker-01"]["where"])
 
 
 class TestValidateResult(LaneTest):
