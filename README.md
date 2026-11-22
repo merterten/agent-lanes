@@ -136,8 +136,9 @@ Everything below is on one private Tailscale network; nothing listens on the pub
 |---|---|---|
 | Desktop PC (Windows + WSL2) | AMD Ryzen 7 7800X3D (8 cores), 64 GB RAM, NVIDIA RTX 4090 24 GB, ~1.4 TB SSD | Lead session (Claude Code), local lanes in herdr, all git and merges. The 4090 runs GPU work locally: model inference, batch jobs, and video + audio generation |
 | Laptop (Windows + WSL2) | Intel Core i7-13700H (14 cores / 20 threads), 32 GB RAM, integrated graphics | Always-on remote lane host: long CPU jobs as `systemd --user` units at `nice 19`, pushed and pulled with rsync; its own herdr `lanes` workspace |
-| Mac mini | Apple M2 (8 cores), 16 GB RAM, 256 GB SSD | macOS host with its own herdr workspace for a separate project; reachable as an ssh host |
-| MacBook | macOS | Heeler client (Mac app) |
+| Mac mini (M2) | Apple M2 (8 cores), 16 GB RAM, 256 GB SSD | macOS host with its own herdr workspace for a separate project; reachable as an ssh host |
+| Mac mini (M6) | Apple M6 | Second macOS host on the tailnet |
+| MacBook Pro (M4) | Apple M4 | Heeler client (Mac app) |
 | iPhone / iPad | iOS / iPadOS | Heeler clients: watch lanes, get the push when one finishes, attach to a pane |
 
 What each lane needs decides where it goes:
@@ -147,8 +148,8 @@ What each lane needs decides where it goes:
 | Quick edit, review, anything touching git | Desktop, local lane |
 | Long CPU grid / backtest / test matrix | Laptop (`--host laptop`, falls back to local) |
 | GPU: inference, image / video / audio generation | Desktop (4090) |
-| macOS-only build or check | Mac mini |
-| Watching, approving, nudging | Phone / tablet / MacBook via Heeler |
+| macOS-only build or check | Mac minis (M2, M6) |
+| Watching, approving, nudging | Phone / tablet / MacBook Pro via Heeler |
 
 ## Safety rules the tool enforces
 
