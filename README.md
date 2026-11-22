@@ -10,7 +10,7 @@ You hand coding tasks to several cheap AI agents at once. Each one works in its 
 
 It was built this way too: six DeepSeek agents wrote the modules in parallel, and Claude Code reviewed them. The review found real bugs that the agents' own green tests had missed. See [docs/how-this-was-built.md](docs/how-this-was-built.md).
 
-Plain Python 3.12 standard library: no dependencies, 302 tests.
+Plain Python 3.12 standard library: no dependencies, 307 tests.
 
 ## The loop
 
@@ -63,7 +63,7 @@ The reviewer reads 30 lines instead of a whole agent transcript. Every number in
 
 ```
 git clone https://github.com/merterten/agent-lanes && cd agent-lanes
-python3 -m unittest discover -s agent_lanes          # 302 tests, temp dirs only
+python3 -m unittest discover -s agent_lanes          # 307 tests, temp dirs only
 ln -s "$PWD/agent_lanes/lane.py" ~/.local/bin/lane
 ```
 
@@ -90,7 +90,7 @@ Define each machine once in `~/.config/agent-lanes/hosts.toml`:
 
 ```toml
 [hosts.gpu-box]
-ssh = "user@203.0.113.10"          # or an ~/.ssh/config alias
+ssh = "user@gpu-host"              # or an ~/.ssh/config alias
 root = "~/agent-lanes/worktrees"   # mirrors LANE_WORKTREES
 prefix = ["wsl.exe", "-d", "Ubuntu", "--"]   # optional command prefix
 worker = "oc-worker"               # remote agent CLI (default: same as local)
