@@ -81,6 +81,8 @@ Configuration is all environment variables:
 
 The agent CLI is your own wrapper. It is called as `<bin> --write [-m MODEL] "<task>"` with the worktree as its working directory, and as `<bin> "<task>"` for read-only review/ask. Wrap any coding agent (OpenCode, Claude Code, Aider, …) behind that interface. **Run it in a sandbox:** the wrapper is where you keep the agent away from credentials and other folders. This repo deliberately doesn't ship one, because sandboxing depends on your machine.
 
+[docs/workers.md](docs/workers.md) describes the two wrappers we use (OpenCode and Command Code on DeepSeek V4.1 Flash, bubblewrap sandbox, key on a file descriptor) and the lane loop around them.
+
 
 ## Remote hosts
 
