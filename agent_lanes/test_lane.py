@@ -54,6 +54,25 @@ VALID_WORKER = textwrap.dedent('''
         fh.write("ok\\n")
 ''')
 
+class _OpenPipeOnStdin:
+    """Put an open, never-written pipe on fd 0 (the condition that made `opencode run` hang), restore after."""
+    def __enter__(self):
+        self.r, self.w = os.pipe()
+        self.saved = os.dup(0)
+        os.dup2(self.r, 0)
+        return self
+
+    def __exit__(self, *exc):
+        os.dup2(self.saved, 0)
+        for fd in (self.r, self.w, self.saved):
+            os.close(fd)
+
+
+STDIN_WORKER = VALID_WORKER + textwrap.dedent('''
+    with open(os.path.join(wt, ".lane", "stdin.txt"), "w") as fh:
+        fh.write(os.readlink("/proc/self/fd/0"))
+''')
+
 MISSING_WORKER = textwrap.dedent('''
     import sys
     print("line one")
@@ -323,6 +342,16 @@ class TestRun(LaneTest):
         self.assertEqual("oc-worker", entry["worker"])
         self.assertTrue((worktree / ".lane" / "LANE_RESULT.json").exists())
         self.assertIn("all good", out)
+
+    def test_local_worker_gets_no_stdin(self):
+        # Regression: lane run used to pass its own stdin to the worker; with an open pipe (e.g. started from an
+        # agent's shell) `opencode run` read it and never returned.
+        os.environ["LANE_OC_BIN"] = str(self.script("fake-oc", STDIN_WORKER))
+        worktree = self.make_lane()
+        with _OpenPipeOnStdin():
+            code, out = self.cli("run", "oc-worker-01", str(self.brief()))
+        self.assertEqual(0, code, out)
+        self.assertEqual("/dev/null", (worktree / ".lane" / "stdin.txt").read_text())
 
     def test_local_missing_result_returns_one_and_shows_log_tail(self):
         os.environ["LANE_OC_BIN"] = str(self.script("fake-oc", MISSING_WORKER))

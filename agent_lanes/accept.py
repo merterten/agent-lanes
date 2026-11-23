@@ -164,8 +164,7 @@ def _run_shell(cmd, cwd, timeout, log_path):
             timeout=timeout,
             capture_output=True,
             text=True,
-            errors="replace",
-        )
+            errors="replace", stdin=subprocess.DEVNULL)
         output = _as_text(proc.stdout) + _as_text(proc.stderr)
         rc = proc.returncode
     except subprocess.TimeoutExpired as exc:

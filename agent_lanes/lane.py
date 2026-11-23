@@ -622,7 +622,7 @@ def _execute_local(args, worker, worktree, task, log_path):
     argv.append(task)
     try:
         with open(log_path, "wb") as fh:
-            proc = subprocess.run(argv, cwd=str(worktree), stdout=fh, stderr=subprocess.STDOUT)
+            proc = subprocess.run(argv, cwd=str(worktree), stdout=fh, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL)
         return proc.returncode
     except OSError as exc:
         _append(log_path, f"failed to start {argv[0]}: {exc}\n")

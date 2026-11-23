@@ -186,7 +186,9 @@ def run_merge(main_repo, worktree, lane, message, tests, timeout=1800,
                 'detail': 'commit message must not be empty'}
     full_message = trailer_message + f'\n\nLane: {lane}'
 
-    add = _git(worktree, ['add', '-A', '--', '.', ':!.lane', ':!.lane.prev'])
+    # Stage everything; .lane/ and .lane.prev/ are taken back out just below. No exclude pathspec (':!.lane') here:
+    # git refuses any pathspec that names an ignored path, so `lane merge` failed whenever .lane/ was in .gitignore.
+    add = _git(worktree, ['add', '-A', '--', '.'])
     if add.returncode != 0:
         return {'ok': False, 'step': 'commit',
                 'detail': f'git add failed: {add.stderr.strip()}'}
@@ -252,8 +254,7 @@ def run_merge(main_repo, worktree, lane, message, tests, timeout=1800,
         try:
             proc = subprocess.run(
                 command, shell=True, cwd=str(main_repo),
-                capture_output=True, text=True, timeout=timeout,
-            )
+                capture_output=True, text=True, timeout=timeout, stdin=subprocess.DEVNULL)
             rc = proc.returncode
             output = _text(proc.stdout) + _text(proc.stderr)
         except subprocess.TimeoutExpired as exc:

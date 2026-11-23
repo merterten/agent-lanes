@@ -10,7 +10,7 @@ You hand coding tasks to several cheap AI agents at once. Each one works in its 
 
 It was built this way too: six DeepSeek agents wrote the modules in parallel, and Claude Code reviewed them. The review found real bugs that the agents' own green tests had missed. See [docs/how-this-was-built.md](docs/how-this-was-built.md).
 
-Plain Python 3.12 standard library: no dependencies, 307 tests.
+Plain Python 3.12 standard library: no dependencies, 311 tests.
 
 ## The loop
 
@@ -63,7 +63,7 @@ The reviewer reads 30 lines instead of a whole agent transcript. Every number in
 
 ```
 git clone https://github.com/merterten/agent-lanes && cd agent-lanes
-python3 -m unittest discover -s agent_lanes          # 307 tests, temp dirs only
+python3 -m unittest discover -s agent_lanes          # 311 tests, temp dirs only
 ln -s "$PWD/agent_lanes/lane.py" ~/.local/bin/lane
 ```
 

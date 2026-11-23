@@ -46,8 +46,7 @@ def _run_worker(argv: list[str], cwd: Path, timeout: int) -> tuple[int, str]:
             cwd=str(cwd),
             capture_output=True,
             text=True,
-            timeout=timeout,
-        )
+            timeout=timeout, stdin=subprocess.DEVNULL)
         return proc.returncode, _combine(proc.stdout, proc.stderr)
     except subprocess.TimeoutExpired as exc:
         out = _as_text(getattr(exc, "stdout", ""))

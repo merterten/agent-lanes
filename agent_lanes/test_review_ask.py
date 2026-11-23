@@ -20,6 +20,20 @@ import ask  # noqa: E402
 import review  # noqa: E402
 
 
+class _OpenPipeOnStdin:
+    """Put an open, never-written pipe on fd 0 (the condition that made `opencode run` hang), restore after."""
+    def __enter__(self):
+        self.r, self.w = os.pipe()
+        self.saved = os.dup(0)
+        os.dup2(self.r, 0)
+        return self
+
+    def __exit__(self, *exc):
+        os.dup2(self.saved, 0)
+        for fd in (self.r, self.w, self.saved):
+            os.close(fd)
+
+
 FAKE_OC = r'''#!/usr/bin/env python3
 import json
 import os
@@ -30,7 +44,7 @@ import time
 record = os.environ.get("FAKE_OC_RECORD")
 if record:
     with open(record, "a", encoding="utf-8") as fh:
-        fh.write(json.dumps({"argv": sys.argv[1:], "cwd": os.getcwd()}) + "\n")
+        fh.write(json.dumps({"argv": sys.argv[1:], "cwd": os.getcwd(), "stdin": os.readlink("/proc/self/fd/0")}) + "\n")
 
 snap = os.environ.get("FAKE_OC_SNAPSHOT")
 if snap:
@@ -161,6 +175,16 @@ class ReviewAskTests(unittest.TestCase):
         self.assertEqual(len(entries[0]["argv"]), 1)
         self.assertNotIn("--write", entries[0]["argv"])
         self.assertEqual(Path(entries[0]["cwd"]).resolve(), self.repo.resolve())
+
+    def test_review_and_ask_workers_get_no_stdin(self):
+        # Regression: an inherited open stdin made `opencode run` wait forever for input.
+        self.set_worker(out="FINDINGS: 0\n")
+        with _OpenPipeOnStdin():
+            self.call_review()
+            ask.run_ask("What is X?", self.repo, self.out)
+        entries = self.recorded()
+        self.assertEqual(len(entries), 2)
+        self.assertEqual([e["stdin"] for e in entries], ["/dev/null", "/dev/null"])
 
     def test_review_prompt_contains_checklist_and_read_instruction(self):
         self.set_worker(out="FINDINGS: 0\n")

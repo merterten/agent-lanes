@@ -272,6 +272,28 @@ class MergeTest(unittest.TestCase):
         self.assertIn('accept lane 32', body)
         self.assertIn('Lane: oc-worker-32', body)
 
+    def test_merges_when_lane_dirs_are_gitignored(self):
+        # Regression: `git add -A -- . ':!.lane'` fails ("paths are ignored") when .lane/ is in .gitignore.
+        self.write(self.main / '.gitignore', '.lane/\n.lane.prev/\n')
+        self.git(self.main, 'add', '.gitignore')
+        self.git(self.main, 'commit', '-q', '-m', 'ignore lane dirs')
+        lane = self.lane('oc-worker-60', {'new.txt': 'work\n', '.lane/REPORT.md': 'r\n', '.lane.prev/old.md': 'o\n'})
+        result = self.merge_lane('oc-worker-60')
+        self.assertTrue(result['ok'], result)
+        files = self.git(lane, 'show', '--name-only', '--format=', 'HEAD').stdout.split()
+        self.assertEqual(files, ['new.txt'])
+        self.assertEqual(self.read(self.main / 'new.txt'), 'work\n')
+
+    def test_lane_dirs_never_committed_when_not_ignored(self):
+        lane = self.lane('oc-worker-61', {'b.txt': 'bee\n', '.lane/REPORT.md': 'r\n', '.lane/LANE_RESULT.json': '{}\n', '.lane.prev/x.md': 'x\n'})
+        result = self.merge_lane('oc-worker-61')
+        self.assertTrue(result['ok'], result)
+        tracked = self.git(self.main, 'ls-files').stdout.split()
+        self.assertNotIn('.lane/REPORT.md', tracked)
+        self.assertNotIn('.lane.prev/x.md', tracked)
+        self.assertIn('b.txt', tracked)
+        self.assertTrue((lane / '.lane' / 'REPORT.md').exists(), 'lane result files stay on disk')
+
     def test_merge_commit_has_two_parents(self):
         self.lane('oc-worker-33', {'a.txt': 'two parents\n'})
         result = self.merge_lane('oc-worker-33')
