@@ -165,6 +165,19 @@ Counts are measured from the tools' own session logs (Claude Code and Codex tran
 | Command Code workers (mostly DeepSeek V4.1 Flash) | ~130 lanes, 41,562 requests (Nov) | 7.2 B | **$10** flat plan (99% of the monthly limit used) |
 | Local RTX 4090 (Qwen 27B) | 25 private code reviews of safety fixes | 9.8 M | **2.5 GPU-hours**, about 1 kWh |
 
+Strategy research and testing behind it:
+
+| What | Count |
+|---|---|
+| Strategy studies (each with a brief, a pre-registered rule set or a written verdict) | 182 |
+| Third-party strategies and indicators tested and rejected | 62, published in [forex-strategy-graveyard](https://github.com/merterten/forex-strategy-graveyard) |
+| Strategy configurations run forward on demo accounts | 21 (8 at a time) |
+| Revisions to the bot's core code | 98 commits; at least 7 live packages deployed since 2026-11-13 |
+| Automated tests | 1,246 in the bot's core suite, plus 102 Python test files for tools and dashboard |
+| Price data tested on | 12 pinned datasets, 0.98 GB of packed binary: 6 years (2020–2026) of EURUSD and GBPJPY, 16 months of USDJPY ticks, USDJPY and gold minute bars, plus held-back periods kept out of design and opened only for the final check |
+
+Every candidate had to pass on data it was not designed on, with costs included, before it got a demo account; most did not.
+
 What this shows:
 
 - **Cache reads are the bill.** 98% of Claude's tokens are re-read context. Long lead sessions are cheap per token and expensive in total.
