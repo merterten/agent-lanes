@@ -1,6 +1,15 @@
+<p align="right"><b>English</b> · <a href="README.tr.md">Türkçe</a></p>
+
 # agent-lanes
 
 **Run AI coding agents in parallel lanes and verify their work before it merges.**
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/where-en-dark.svg">
+  <img src="docs/img/where-en-light.svg" width="440" alt="What runs where: phone, iPad and Mac (Heeler) reach herdr on the main PC over Tailscale; Claude Code leads and hands work through lane to sandboxed OpenCode and Command Code workers; a push arrives when a session or worker finishes; long jobs can go to a second machine.">
+</picture>
+
+<sub>How we run it. The open-source tool in this repo is the <code>lane</code> box; the rest is our own setup around it (<a href="#our-setup">Our setup</a>).</sub>
 
 You hand coding tasks to several cheap AI agents at once. Each one works in its own git worktree (a *lane*). When an agent says *"done, 33 tests pass"*, `agent-lanes` doesn't take its word for it:
 
@@ -8,11 +17,16 @@ You hand coding tasks to several cheap AI agents at once. Each one works in its 
 2. it plants **deliberate bugs (mutants)** in the agent's code to prove its tests would catch them,
 3. it only **merges** work that survives, and reverts the merge if the tests fail on `main`.
 
-It was built this way too: six DeepSeek agents wrote the modules in parallel, and Claude Code reviewed them. The review found real bugs that the agents' own green tests had missed. See [docs/how-this-was-built.md](docs/how-this-was-built.md).
+**Two ways in:**
 
-Plain Python 3.12 standard library: no dependencies, 311 tests.
+- **Use the tool** → [The tool](#the-tool): the `lane` CLI in this repo. MIT, plain Python 3.12 standard library, no dependencies, 315 tests.
+- **See how we run it** → [Our setup](#our-setup): Claude Code as the lead, sandboxed OpenCode / Command Code workers, herdr and Heeler on a phone, the hardware and what it cost. Not part of the tool.
 
-## The loop
+## The tool
+
+What this repo ships: the `lane` CLI (worktrees, a ledger, the result contract, `accept` with mutants, `merge`, a queue and remote hosts). What it does **not** ship: the agent wrappers and their sandbox, herdr, Heeler, or any model access. Those are yours to pick; [Our setup](#our-setup) shows ours.
+
+### The loop
 
 ```
 lane new oc-worker-01 --from main            # isolated worktree + branch, recorded in a ledger
@@ -29,22 +43,9 @@ lane host setup gpu-box                      # install remote_runner.sh
 lane stop oc-worker-01                       # stop a lane running on a remote host
 ```
 
-| Command | What it does |
-|---|---|
-| `new` | Creates a worktree and branch from a ref and records the base commit. |
-| `run` | Sends the brief plus a **result contract** to the agent CLI, waits, and validates the result: schema, lane name, and whether `files_changed` matches the real diff. Can run on another machine over ssh (`--host NAME`) and falls back to local with `--host-or-local` if it's unreachable. |
-| `accept` | Reruns **your** test commands (never commands taken from the agent's file), parses pytest / unittest / dotnet / node counts, flags claim mismatches, and runs mutants in place with byte-identical restore and crash recovery. Writes `ACCEPT_REPORT.md` with PASS/FAIL. |
-| `mutants` | Proposes mutants only on changed lines: Python via `ast` (each mutant must still parse), plus text rules for C#, JS/TS and shell. |
-| `queue` | Runs many lanes from a JSON list with a concurrency cap. `--hosts local,gpu-box,laptop` spreads them using each host's `max_lanes`; entries may pin a `host` or set `fallback_local`. It stops starting new ones when an agent log shows quota or rate-limit errors, or when you create a `STOP` file. |
-| `review` / `ask` | Runs the agent CLI in **read-only** mode for a checklist review of a diff, or for questions about a codebase. |
-| `merge` | Requires a passing `accept` result, checks file overlap with other open lanes, commits, merges with `--no-ff`, reruns the tests on main, and reverts if they fail. |
-| `gc` | Classifies worktrees as running / busy (a process is inside) / open / dirty / ignored-data / merged / unmerged. It only removes anything with `--apply`, and tags unmerged branches before removing them. |
-| `hosts` | Lists configured hosts with an ssh reachability probe, the lanes the ledger says are running there, and used/free capacity. |
-| `host check` | Checks ssh, the configured command prefix, rsync, the worker CLI, a writable root and `systemd --user`, printing PASS/FAIL with a fix hint. |
-| `host setup` | Copies `agent_lanes/remote_runner.sh` to the host and makes it executable. Idempotent. |
-| `stop` | Stops a lane running on a remote host. |
+Every command, flag and what it checks: [docs/cli.md](docs/cli.md).
 
-## The result contract
+### The result contract
 
 Every brief gets this appended (`agent_lanes/contract.txt`). The agent must write:
 
@@ -59,147 +60,52 @@ Every brief gets this appended (`agent_lanes/contract.txt`). The agent must writ
 
 The reviewer reads 30 lines instead of a whole agent transcript. Every number in the file is then checked, not trusted.
 
-## Setup
+### Install
 
 ```
 git clone https://github.com/merterten/agent-lanes && cd agent-lanes
-python3 -m unittest discover -s agent_lanes          # 311 tests, temp dirs only
+python3 -m unittest discover -s agent_lanes          # 315 tests, temp dirs only
 ln -s "$PWD/agent_lanes/lane.py" ~/.local/bin/lane
 ```
 
-Configuration is all environment variables:
-
-| Variable | Default | Meaning |
-|---|---|---|
-| `LANE_ROOT` | `~/agent-lanes` | Base folder |
-| `LANE_MAIN_REPO` | `$LANE_ROOT/repo` | The repo whose `main` the lanes branch from |
-| `LANE_WORKTREES` | `$LANE_ROOT/worktrees` | Where lane worktrees go |
-| `LANE_STATE_DIR` | `$LANE_ROOT/lanes` | Ledger, logs and reports (outside every worktree, so an agent can't forge them) |
-| `LANE_OC_BIN` / `LANE_CC_BIN` | `oc-worker` / `cc-worker` | Agent CLI for `oc-worker-N` / `cc-worker-N` lanes |
-| `LANE_HOSTS` | `~/.config/agent-lanes/hosts.toml` | Remote host definitions |
-| `LANE_SSH` / `LANE_RSYNC` | `ssh` / `rsync` | Binaries used for remote hosts (override for tests) |
+Configuration is environment variables (`LANE_ROOT`, `LANE_MAIN_REPO`, `LANE_WORKTREES`, …); the full table is in [docs/cli.md](docs/cli.md#configuration).
 
 The agent CLI is your own wrapper. It is called as `<bin> --write [-m MODEL] "<task>"` with the worktree as its working directory, and as `<bin> "<task>"` for read-only review/ask. Wrap any coding agent (OpenCode, Claude Code, Aider, …) behind that interface. **Run it in a sandbox:** the wrapper is where you keep the agent away from credentials and other folders. This repo deliberately doesn't ship one, because sandboxing depends on your machine.
 
-[docs/workers.md](docs/workers.md) describes the two wrappers we use (OpenCode and Command Code on DeepSeek V4.1 Flash, bubblewrap sandbox, key on a file descriptor) and the lane loop around them.
+### More machines
 
+Spare PCs, laptops and GPU boxes can run lanes too: define them once in `~/.config/agent-lanes/hosts.toml`, then `lane run LANE --host NAME` or `lane queue work.json --hosts local,gpu-box,laptop --max 3`. Pushes and pulls go over rsync, every ssh call is non-interactive, and unreachable hosts get no new lanes. Setup, Windows/WSL notes and troubleshooting: [docs/multi-machine.md](docs/multi-machine.md).
 
-## Remote hosts
-
-Define each machine once in `~/.config/agent-lanes/hosts.toml`:
-
-```toml
-[hosts.gpu-box]
-ssh = "user@gpu-host"              # or an ~/.ssh/config alias
-root = "~/agent-lanes/worktrees"   # mirrors LANE_WORKTREES
-prefix = ["wsl.exe", "-d", "Ubuntu", "--"]   # optional command prefix
-worker = "oc-worker"               # remote agent CLI (default: same as local)
-nice = 19
-max_lanes = 2
-rsync_path = "wsl.exe -d Ubuntu -- rsync"     # optional, for WSL
-```
-
-`lane host setup NAME` installs the runner, then `lane run LANE --host NAME` pushes the
-lane with rsync, runs the worker detached over ssh, polls for completion and pulls the
-result back. Pushes exclude `.git/`, `.lane/`, build output and credential files; pulls
-never delete local files (remote-side deletions are reported as warnings). Every ssh
-call uses `BatchMode=yes`, `ConnectTimeout` and no agent forwarding.
-
-## Multi-machine
-
-Spread a queue over the spare PCs, laptops and GPU boxes you already have:
-
-```
-lane queue work.json --hosts local,gpu-box,laptop --max 3
-```
-
-Local capacity is `--max`; each remote host uses its `max_lanes`. Entries can
-pin a host (`"host": "gpu-box"`) and optionally fall back to local when it is
-down (`"fallback_local": true`). Reachable remote hosts are preferred, failed
-probes are retried, and unreachable hosts get no new lanes. See
-[docs/multi-machine.md](docs/multi-machine.md) for `hosts.toml`, ssh/WSL
-setup, remote checks, Windows notes, secret excludes and troubleshooting.
-
-## Watching lanes from a phone: Tailscale + herdr + Heeler
-
-We run lanes on two machines and watch them from a phone: Tailscale as the private network, herdr as the
-terminal workspace server (one tab per lane worker), and Heeler as the phone client with a push when a lane
-finishes. [docs/remote-watching.md](docs/remote-watching.md) collects the observations: closing sshd to the
-tailnet, WSL jump hosts and linger, why remote lanes need `systemd --user`, keeping the herdr socket out of
-worker sandboxes, and Heeler's exclusive live attach.
-
-## Hardware in the loop
-
-Everything below is on one private Tailscale network; nothing listens on the public internet.
-
-| Machine | Hardware | Role in the loop |
-|---|---|---|
-| Desktop PC (Windows + WSL2) | AMD Ryzen 7 7800X3D (8 cores), 64 GB RAM, NVIDIA RTX 4090 24 GB, ~1.4 TB SSD | Lead session (Claude Code), local lanes in herdr, all git and merges. The 4090 runs GPU work locally: model inference, batch jobs, and video + audio generation |
-| Laptop (Windows + WSL2) | Intel Core i7-13700H (14 cores / 20 threads), 32 GB RAM, integrated graphics | Always-on remote lane host: long CPU jobs as `systemd --user` units at `nice 19`, pushed and pulled with rsync; its own herdr `lanes` workspace |
-| Mac mini (M2) | Apple M2 (8 cores), 16 GB RAM, 256 GB SSD | macOS host with its own herdr workspace for a separate project; reachable as an ssh host |
-| Mac mini (M6) | Apple M6 (12 cores: 2 super, 4 performance, 6 efficiency), 16 GB RAM, 256 GB SSD | Second macOS host with herdr and the Heeler plugin; reachable as an ssh host |
-| MacBook Pro (M4) | Apple M4 | Heeler client (Mac app) |
-| iPhone / iPad | iOS / iPadOS | Heeler clients: watch lanes, get the push when one finishes, attach to a pane |
-
-What each lane needs decides where it goes:
-
-| Job | Where |
-|---|---|
-| Quick edit, review, anything touching git | Desktop, local lane |
-| Long CPU grid / backtest / test matrix | Laptop (`--host laptop`, falls back to local) |
-| GPU: inference, image / video / audio generation | Desktop (4090) |
-| macOS-only build or check | Mac minis (M2, M6) |
-| Watching, approving, nudging | Phone / tablet / MacBook Pro via Heeler |
-
-## Example project: what it cost
-
-[live.guytrades.workers.dev](https://live.guytrades.workers.dev) is a public page with eight demo-account forex and gold bots, built with this loop. Claude Code led and reviewed; Codex architected the first month; cheap DeepSeek agents ran the lanes; a local model on the 4090 did a private second review.
-
-Counts are measured from the tools' own session logs (Claude Code and Codex transcripts, OpenCode's session databases, the local reviewer's job folders), deduplicated per API response, from the first session (2026-10-10) to 2026-11-23.
-
-| Agent | Role | Tokens | Cost |
-|---|---|---|---|
-| Claude Code (Opus 5.5, plus a little Fable 5.2 and Haiku 5.5) | Lead coder and reviewer | 3.43 B, of which 3.38 B cache reads; 9.9 M output | **$1,198** at API list prices |
-| Codex (GPT models) | Architect, then reviewer (Oct 10 – Oct 28) | 1.49 B, of which 1.43 B cached; 8.7 M output | subscription |
-| OpenCode workers (DeepSeek Flash, some Pro) | ~420 lane runs (desktop + laptop) | 0.90 B, of which 0.87 B cache reads; 3.6 M output | **$12.58** |
-| Command Code workers (mostly DeepSeek V4.1 Flash) | ~130 lanes, 41,562 requests (Nov) | 7.2 B | **$10** flat plan (99% of the monthly limit used) |
-| Local RTX 4090 (Qwen 27B) | 25 private code reviews of safety fixes | 9.8 M | **2.5 GPU-hours**, about 1 kWh |
-
-Strategy research and testing behind it:
-
-| What | Count |
-|---|---|
-| Strategy studies (each with a brief, a pre-registered rule set or a written verdict) | 182 |
-| Third-party strategies and indicators tested and rejected | 62 |
-| Strategy configurations run forward on demo accounts | 21 (8 at a time) |
-| Revisions to the bot's core code | 98 commits; at least 7 live packages deployed since 2026-11-13 |
-| Automated tests | 1,246 in the bot's core suite, plus 102 Python test files for tools and dashboard |
-| Price data tested on | 12 pinned datasets, 0.98 GB of packed binary: 6 years (2020–2026) of EURUSD and GBPJPY, 16 months of USDJPY ticks, USDJPY and gold minute bars, plus held-back periods kept out of design and opened only for the final check |
-
-Every candidate had to pass on data it was not designed on, with costs included, before it got a demo account; most did not.
-
-What this shows:
-
-- **Cache reads are the bill.** 98% of Claude's tokens are re-read context. Long lead sessions are cheap per token and expensive in total.
-- **The lanes were nearly free.** The workers burned more tokens than the lead (8.1 B vs 3.4 B) for about $23 in total: $12.58 on OpenCode and a $10 Command Code plan, roughly 2% of the lead's API-price cost. The expensive part is the lead reading diffs, writing mutants and reviewing.
-- **The local GPU paid for itself in findings, not tokens.** It took about 6 minutes per review and found real integrity bugs that the green test suites had missed.
-
-Notes: Claude and Codex ran on flat subscriptions, so their numbers are API-price equivalents, not cash spent. The Command Code figures come from its account dashboard for the November billing month (the plan started 2026-11-01). Claude Code deletes transcripts after 30 days, so Claude sessions before 2026-10-21 are missing and its number is a lower bound. Over the same period the project made 1,096 commits; its core test suite has 1,246 tests.
-
-<details>
-<summary>🇹🇷 Kurulum rehberi: this whole setup from scratch, in Turkish</summary>
-
-[Sıfırdan kurulum: WSL + Claude Code + OpenCode / Command Code işçileri + herdr + Heeler](https://live.guytrades.workers.dev/r/D4mA5rcwHdBUheQajCHSTzTn): every step from `wsl --install` to watching lanes on a phone, with the sandboxed worker wrappers and their self-tests, a "what runs where" diagram, click-to-open "ne yapar?" intros for each tool, and ready-to-use Claude instructions ([CLAUDE.md](https://live.guytrades.workers.dev/r/D4mA5rcwHdBUheQajCHSTzTn/CLAUDE.md), [KURULUM.md](https://live.guytrades.workers.dev/r/D4mA5rcwHdBUheQajCHSTzTn/KURULUM.md)).
-
-</details>
-
-## Safety rules the tool enforces
+### Safety rules the tool enforces
 
 - Nothing in an agent's result file is ever executed. Test commands come from the reviewer.
 - Stale results are moved aside before each run, so an old `LANE_RESULT.json` can never be accepted.
 - `accept` fails when no test commands are given, and doesn't run mutants when the tests already fail (otherwise every mutant would look "killed").
 - `merge` refuses unaccepted lanes, untested merges, a dirty `main`, and overlaps with other open lanes; it uses `revert`, never `reset --hard`.
 - `gc` is a dry run by default and never removes a worktree with a running process inside, uncommitted changes, ignored data, or an open ledger status.
+
+### How it was built
+
+With its own workflow: DeepSeek agents wrote the modules in parallel lanes and Claude Code reviewed them; the review found real bugs their green tests had missed. [docs/how-this-was-built.md](docs/how-this-was-built.md)
+
+## Our setup
+
+Not part of the tool: this is how we run it day to day. Claude Code leads in one terminal workspace per project; cheap DeepSeek agents (OpenCode, Command Code) work in sandboxed lanes; [herdr](https://herdr.dev) keeps every session alive as a tab; Heeler on a phone shows them and pushes when one finishes. The diagram at the top is this setup.
+
+| Where | Idea | What you get |
+|---|---|---|
+| Phone | Ping when a Claude finishes | Whichever workspace's Claude finishes, your phone gets a push; read it in Heeler's Chat view and reply there. |
+| At the PC | Split the work | The lead Claude splits a task by file (say, into three); the workers run at the same time in separate sandboxes while you watch in herdr. |
+| In the background | Overnight test runs | Workers run tests while you sleep; in the morning Heeler shows what failed and you hand it to the lead session. |
+| Second machine | Offload heavy jobs | Long builds and test runs go to a second machine at `nice 19`; the main PC stays responsive and you watch from the phone. |
+| Everywhere | Cheap model writes, Claude checks | Cheap DeepSeek workers write the code; Claude reads the diff and runs the tests itself. Cost goes down, quality does not. |
+
+| Read more | |
+|---|---|
+| [docs/setup-guide.md](docs/setup-guide.md) | Roles, phone access, hardware and the example project's real cost |
+| [docs/workers.md](docs/workers.md) | Our two worker wrappers: bubblewrap sandbox, key on a file descriptor, self-tests |
+| [docs/remote-watching.md](docs/remote-watching.md) | Tailscale + herdr + Heeler: watching lanes from anywhere |
+| [Full step-by-step guide (Turkish)](https://live.guytrades.workers.dev/r/D4mA5rcwHdBUheQajCHSTzTn) | From `wsl --install` to watching lanes on a phone, with ready-to-use Claude instructions ([CLAUDE.md](https://live.guytrades.workers.dev/r/D4mA5rcwHdBUheQajCHSTzTn/CLAUDE.md), [KURULUM.md](https://live.guytrades.workers.dev/r/D4mA5rcwHdBUheQajCHSTzTn/KURULUM.md)). There is no full English version yet. |
 
 ## License
 
