@@ -105,7 +105,7 @@ Not part of the tool: this is how we run it day to day. Claude Code leads in one
 | [docs/setup-guide.md](docs/setup-guide.md) | Roles, phone access, hardware and the example project's real cost |
 | [docs/workers.md](docs/workers.md) | Our two worker wrappers: bubblewrap sandbox, key on a file descriptor, self-tests |
 | [docs/remote-watching.md](docs/remote-watching.md) | Tailscale + herdr + Heeler: watching lanes from anywhere |
-| [Full step-by-step guide (Turkish)](https://live.guytrades.workers.dev/r/D4mA5rcwHdBUheQajCHSTzTn) | From `wsl --install` to watching lanes on a phone, with ready-to-use Claude instructions ([CLAUDE.md](https://live.guytrades.workers.dev/r/D4mA5rcwHdBUheQajCHSTzTn/CLAUDE.md), [KURULUM.md](https://live.guytrades.workers.dev/r/D4mA5rcwHdBUheQajCHSTzTn/KURULUM.md)). There is no full English version yet. |
+| [Full step-by-step guide (Turkish)](https://merterten.github.io/agent-lanes/kurulum/) | From `wsl --install` to watching lanes on a phone, with ready-to-use Claude instructions ([CLAUDE.md](https://merterten.github.io/agent-lanes/kurulum/CLAUDE.md), [KURULUM.md](https://merterten.github.io/agent-lanes/kurulum/KURULUM.md)). There is no full English version yet. |
 
 ## License
 

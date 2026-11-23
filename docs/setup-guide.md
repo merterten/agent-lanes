@@ -93,4 +93,4 @@ Notes: Claude and Codex ran on flat subscriptions, so their numbers are API-pric
 
 ## Full step-by-step guide (Turkish)
 
-[Sıfırdan kurulum](https://live.guytrades.workers.dev/r/D4mA5rcwHdBUheQajCHSTzTn): every step from `wsl --install` to watching lanes on a phone, with the worker wrappers and their self-tests, click-to-open intros for each tool, and ready-to-use Claude instructions ([CLAUDE.md](https://live.guytrades.workers.dev/r/D4mA5rcwHdBUheQajCHSTzTn/CLAUDE.md), [KURULUM.md](https://live.guytrades.workers.dev/r/D4mA5rcwHdBUheQajCHSTzTn/KURULUM.md)). There is no full English version yet.
+[Sıfırdan kurulum](https://merterten.github.io/agent-lanes/kurulum/): every step from `wsl --install` to watching lanes on a phone, with the worker wrappers and their self-tests, click-to-open intros for each tool, and ready-to-use Claude instructions ([CLAUDE.md](https://merterten.github.io/agent-lanes/kurulum/CLAUDE.md), [KURULUM.md](https://merterten.github.io/agent-lanes/kurulum/KURULUM.md)). There is no full English version yet.

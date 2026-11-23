@@ -105,7 +105,7 @@ Aracın parçası değil: biz onu her gün böyle kullanıyoruz. Claude Code her
 | [docs/setup-guide.tr.md](docs/setup-guide.tr.md) | Roller, telefondan erişim, donanım ve örnek projenin gerçek maliyeti |
 | [docs/workers.md](docs/workers.md) (İngilizce) | İki işçi sarmalayıcımız: bubblewrap sandbox, dosya tanımlayıcısıyla anahtar, kendi kendine testler |
 | [docs/remote-watching.md](docs/remote-watching.md) (İngilizce) | Tailscale + herdr + Heeler: lane'leri her yerden izlemek |
-| [Adım adım tam rehber](https://live.guytrades.workers.dev/r/D4mA5rcwHdBUheQajCHSTzTn) | `wsl --install`'dan telefonda lane izlemeye kadar her adım, hazır Claude talimatlarıyla ([CLAUDE.md](https://live.guytrades.workers.dev/r/D4mA5rcwHdBUheQajCHSTzTn/CLAUDE.md), [KURULUM.md](https://live.guytrades.workers.dev/r/D4mA5rcwHdBUheQajCHSTzTn/KURULUM.md)). |
+| [Adım adım tam rehber](https://merterten.github.io/agent-lanes/kurulum/) | `wsl --install`'dan telefonda lane izlemeye kadar her adım, hazır Claude talimatlarıyla ([CLAUDE.md](https://merterten.github.io/agent-lanes/kurulum/CLAUDE.md), [KURULUM.md](https://merterten.github.io/agent-lanes/kurulum/KURULUM.md)). |
 
 ## Lisans
 

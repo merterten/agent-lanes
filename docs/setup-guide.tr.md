@@ -89,4 +89,4 @@ Notlar: Claude ve Codex sabit aboneliklerle çalıştı, yani sayıları harcana
 
 ## Adım adım tam rehber
 
-[Sıfırdan kurulum](https://live.guytrades.workers.dev/r/D4mA5rcwHdBUheQajCHSTzTn): `wsl --install`'dan telefonda lane izlemeye kadar her adım; işçi sarmalayıcıları ve kendi kendine testleri, her araç için tıklayınca açılan tanıtımlar ve hazır Claude talimatları ([CLAUDE.md](https://live.guytrades.workers.dev/r/D4mA5rcwHdBUheQajCHSTzTn/CLAUDE.md), [KURULUM.md](https://live.guytrades.workers.dev/r/D4mA5rcwHdBUheQajCHSTzTn/KURULUM.md)).
+[Sıfırdan kurulum](https://merterten.github.io/agent-lanes/kurulum/): `wsl --install`'dan telefonda lane izlemeye kadar her adım; işçi sarmalayıcıları ve kendi kendine testleri, her araç için tıklayınca açılan tanıtımlar ve hazır Claude talimatları ([CLAUDE.md](https://merterten.github.io/agent-lanes/kurulum/CLAUDE.md), [KURULUM.md](https://merterten.github.io/agent-lanes/kurulum/KURULUM.md)).
