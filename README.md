@@ -186,6 +186,13 @@ What this shows:
 
 Notes: Claude and Codex ran on flat subscriptions, so their numbers are API-price equivalents, not cash spent. The Command Code figures come from its account dashboard for the November billing month (the plan started 2026-11-01). Claude Code deletes transcripts after 30 days, so Claude sessions before 2026-10-21 are missing and its number is a lower bound. Over the same period the project made 1,096 commits; its core test suite has 1,246 tests.
 
+<details>
+<summary>🇹🇷 Kurulum rehberi: this whole setup from scratch, in Turkish</summary>
+
+[Sıfırdan kurulum: WSL + Claude Code + OpenCode / Command Code işçileri + herdr + Heeler](https://live.guytrades.workers.dev/r/D4mA5rcwHdBUheQajCHSTzTn): every step from `wsl --install` to watching lanes on a phone, with the sandboxed worker wrappers and their self-tests, a "what runs where" diagram, click-to-open "ne yapar?" intros for each tool, and ready-to-use Claude instructions ([CLAUDE.md](https://live.guytrades.workers.dev/r/D4mA5rcwHdBUheQajCHSTzTn/CLAUDE.md), [KURULUM.md](https://live.guytrades.workers.dev/r/D4mA5rcwHdBUheQajCHSTzTn/KURULUM.md)).
+
+</details>
+
 ## Safety rules the tool enforces
 
 - Nothing in an agent's result file is ever executed. Test commands come from the reviewer.
