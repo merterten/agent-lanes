@@ -1,0 +1,775 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow"><meta property="og:type" content="website">
+<meta property="og:title" content="Sıfırdan kurulum: WSL + Claude Code + OpenCode / Command Code işçileri + herdr + Heeler"><meta property="og:description" content="Windows + WSL üzerinde sıfırdan: Claude Code lider, sandbox içinde OpenCode ve Command Code işçileri, lane, herdr ve Heeler. Adım adım, hazır betikler ve Claude talimat dosyalarıyla.">
+<meta name="twitter:card" content="summary"><meta name="twitter:title" content="Sıfırdan kurulum: WSL + Claude Code + OpenCode / Command Code işçileri + herdr + Heeler"><meta name="twitter:description" content="Windows + WSL üzerinde sıfırdan: Claude Code lider, sandbox içinde OpenCode ve Command Code işçileri, lane, herdr ve Heeler. Adım adım, hazır betikler ve Claude talimat dosyalarıyla.">
+<title>Sıfırdan kurulum: WSL + Claude Code + OpenCode / Command Code işçileri + herdr + Heeler</title><style>:root{color-scheme:dark;--bg:#0d1117;--bg-alt:#161b22;--fg:#e6edf3;--mut:#8b949e;--line:#30363d;--acc:#58a6ff;--ok:#3fb950;--warn:#d29922;--bad:#f85149;--ff:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;--fm:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--fs-xs:11px;--fs-sm:13px;--fs-base:16px;--fs-lg:18px;--sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--sp-6:32px;--sp-7:40px;--r-sm:6px;--r-md:8px;--r-lg:12px;--r-pill:999px;--sh-sm:0 1px 2px rgba(0,0,0,.4);--sh-md:0 6px 24px rgba(0,0,0,.45)}*,*::before,*::after{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;min-height:100vh;background:var(--bg);color:var(--fg);font:var(--fs-base)/1.62 var(--ff);overflow-wrap:break-word}a{color:var(--acc);text-decoration:none;text-underline-offset:2px}a:hover{text-decoration:underline}:focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:var(--r-sm)}h1,h2,h3,h4{color:var(--fg);font-weight:600;line-height:1.2;letter-spacing:-.01em;margin:0 0 var(--sp-3)}h1{font-size:clamp(21px,5.6vw,32px)}h2{font-size:clamp(17px,4.4vw,21px);margin-top:var(--sp-6)}h3{font-size:15px;margin-top:var(--sp-5)}p{margin:0 0 var(--sp-3);max-width:74ch}small,.muted{color:var(--mut);font-size:var(--fs-sm)}code,kbd,samp,pre{font-family:var(--fm);font-size:.92em}code{padding:.1em .35em;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--bg-alt)}pre{margin:0 0 var(--sp-4);padding:var(--sp-3) var(--sp-4);border:1px solid var(--line);border-radius:var(--r-md);background:var(--bg-alt);overflow-x:auto;line-height:1.5}pre code{padding:0;border:0;background:none;font-size:inherit}table{width:100%;border-collapse:collapse;font-size:var(--fs-sm);font-variant-numeric:tabular-nums}caption{caption-side:top;padding:var(--sp-2) var(--sp-3);border-bottom:1px solid var(--line);color:var(--mut);font-size:var(--fs-xs);letter-spacing:.04em;text-transform:uppercase;text-align:left}th,td{padding:var(--sp-2) var(--sp-3);border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:var(--mut);font-size:var(--fs-xs);font-weight:600;letter-spacing:.05em;text-transform:uppercase}tbody tr:last-child td{border-bottom:0}.tw{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:var(--r-md);background:var(--bg-alt);margin:0 0 var(--sp-3)}.btn,button{display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-2);min-height:40px;padding:var(--sp-2) var(--sp-4);border:1px solid var(--line);border-radius:var(--r-pill);background:var(--bg-alt);color:var(--acc);font:inherit;font-size:var(--fs-sm);text-decoration:none;cursor:pointer}.btn:hover,button:hover{background:#1c2430;text-decoration:none}.pill,.badge{display:inline-block;padding:1px var(--sp-2);border:1px solid var(--line);border-radius:var(--r-pill);color:var(--mut);font-size:10px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}.pill.ok,.badge.ok{color:var(--ok);border-color:#238636}.pill.warn,.badge.warn{color:var(--warn);border-color:#9e6a03}.pill.bad,.badge.bad{color:var(--bad);border-color:#da3633}.card{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--bg-alt);padding:var(--sp-3) var(--sp-4);box-shadow:var(--sh-sm)}.site-head{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);flex-wrap:wrap;padding:var(--sp-3) var(--sp-4);border-bottom:1px solid var(--line)}.brand{font-weight:700;letter-spacing:.02em;color:var(--fg);white-space:nowrap}.brand .trades{color:var(--acc)}.brand-sub{color:var(--mut);font-weight:400;font-size:var(--fs-sm);letter-spacing:0}.brand-row{display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-1) var(--sp-2);min-width:0;min-height:28px}.brand-mark{flex:none;display:block;width:28px;height:28px}.brand-tagline{color:var(--mut);font-weight:400;font-size:var(--fs-sm);letter-spacing:0;line-height:1.35;min-width:0}.head-right{display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;min-width:0}.site-foot{margin-top:var(--sp-7);padding:var(--sp-3) var(--sp-4);border-top:1px solid var(--line);color:var(--mut);font-size:var(--fs-xs);line-height:1.55}.wrap{max-width:980px;margin:0 auto;padding:0 var(--sp-4) var(--sp-7)}@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}@media (max-width:560px){.brand-tagline{flex:1 1 100%}}@media (max-width:390px){body{font-size:15px}.wrap,.site-head,.site-foot{padding-left:var(--sp-3);padding-right:var(--sp-3)}h1{font-size:20px}th,td{padding:6px 8px}.btn,button{min-height:40px}}main{max-width:960px;margin:0 auto;padding:var(--sp-3) var(--sp-4) var(--sp-7)}h1{margin:0 0 var(--sp-2)}h2{font-size:var(--fs-lg);margin:var(--sp-7) 0 var(--sp-3);padding-top:var(--sp-3);border-top:1px solid var(--line)}h3{font-size:var(--fs-base);margin:var(--sp-4) 0 var(--sp-2)}p{margin:0 0 var(--sp-2)}ul,ol{margin:0 0 var(--sp-2);padding-left:22px}li{margin:4px 0}code{font-family:var(--fm);font-size:.92em;background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--r-sm);padding:0 4px;overflow-wrap:anywhere}pre code{background:none;border:0;padding:0;font-size:inherit;overflow-wrap:normal}figure.code{margin:0 0 var(--sp-3)}figcaption{font-size:var(--fs-xs);color:var(--mut);margin:0 0 4px}pre{overflow-x:auto;background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--r-lg);padding:12px 14px;font-size:var(--fs-sm);line-height:1.5;margin:0}.tw{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r-lg);margin:0 0 var(--sp-3)}table{border-collapse:collapse;width:100%;font-size:var(--fs-sm)}th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line)}th{background:var(--bg-alt);font-weight:600}tr:last-child td{border-bottom:0}td{overflow-wrap:anywhere}.files{display:flex;flex-wrap:wrap;gap:8px;margin:var(--sp-3) 0}.files a{display:inline-flex;align-items:center;min-height:40px;padding:6px 14px;border:1px solid var(--line);border-radius:var(--r-pill);color:var(--acc);text-decoration:none}nav.toc{border:1px solid var(--line);border-radius:var(--r-lg);padding:var(--sp-2) var(--sp-3);margin:var(--sp-3) 0}nav.toc ul{columns:2;column-gap:var(--sp-5);margin:0;padding:0;list-style:none}nav.toc a{color:var(--acc);text-decoration:none}hr{border:0;border-top:1px solid var(--line);margin:var(--sp-4) 0}.where-block{margin:var(--sp-3) 0 var(--sp-5)}h2.lead-h{border-top:0;margin-top:var(--sp-3);padding-top:0}.num{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:12px;background:var(--acc);color:var(--bg);font-size:var(--fs-sm);font-weight:700;margin-right:6px}.where-grid{display:grid;grid-template-columns:minmax(0,400px) minmax(0,1fr);gap:var(--sp-4);align-items:start}.sv{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:var(--r-lg);background:var(--bg-alt)}.sv .box{fill:var(--bg);stroke:var(--line);stroke-width:1.5}.sv .box-acc{stroke:var(--acc)}.sv .box-ok{stroke:var(--ok)}.sv .box-sb{fill:none;stroke:var(--warn);stroke-dasharray:5 4}.sv .box-dash{stroke-dasharray:5 4}.sv .chip{fill:var(--bg-alt);stroke:var(--line)}.sv .tt{fill:var(--fg);font-family:var(--ff);font-size:11px;font-weight:600}.sv .tm{fill:var(--mut);font-family:var(--ff);font-size:9.5px}.sv .ln{stroke:var(--mut);stroke-width:1.5;fill:none}.sv .ln-acc{stroke:var(--acc)}.sv .ln-ok{stroke:var(--ok)}.sv .arrow{fill:var(--acc)}.sv .arrow-ok{fill:var(--ok)}ul.ideas{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}ul.ideas-top{grid-template-columns:1fr}.idea{display:flex;flex-direction:column;gap:4px;margin:0;padding:10px 12px;border:1px solid var(--line);border-left:4px solid var(--mut);border-radius:var(--r-md);background:var(--bg-alt)}.idea strong{font-size:var(--fs-base)}.idea .what{font-size:var(--fs-sm)}.idea .where{font-size:var(--fs-xs);letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}.idea .src{font-size:var(--fs-xs);color:var(--mut)}.idea-tel{border-left-color:var(--ok)}.idea-pc{border-left-color:var(--acc)}.idea-bg{border-left-color:var(--warn)}.idea-m2{border-left-color:var(--mut)}.idea-all{border-left-color:var(--bad)}.more-h{margin:var(--sp-4) 0 var(--sp-2);color:var(--mut);font-size:var(--fs-sm)}details.more{border:1px solid var(--line);border-radius:var(--r-lg);margin:0 0 8px;padding:0 var(--sp-3)}details.more summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600}details.more[open]{padding-bottom:var(--sp-3)}details.more .cnt{margin-left:auto;color:var(--mut);font-weight:400;font-size:var(--fs-sm)}details.more .num{background:var(--bg-alt);color:var(--acc);border:1px solid var(--acc)}.intros{margin:0 0 var(--sp-5)}details.intro{border:1px solid var(--line);border-radius:var(--r-lg);margin:0 0 8px;background:var(--bg)}details.intro summary{cursor:pointer;min-height:48px;display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;padding:8px var(--sp-3)}details.intro summary .iname{font-weight:700;color:var(--acc)}details.intro summary .itag{color:var(--mut);font-size:var(--fs-sm)}details.intro[open] summary{border-bottom:1px solid var(--line)}.ibody{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:var(--sp-4);padding:var(--sp-3)}.itext h3{margin:0 0 6px;font-size:var(--fs-sm);letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}.itext ul{margin:0 0 var(--sp-3)}.inot{color:var(--mut)}.site-foot{margin-top:var(--sp-6);color:var(--mut);font-size:var(--fs-sm)}@media (max-width:700px){main{padding-left:var(--sp-3);padding-right:var(--sp-3)}nav.toc ul{columns:1}th,td{padding:6px 8px}.where-grid{grid-template-columns:1fr}.ibody{grid-template-columns:1fr}}</style></head><body>
+<header class="site-head"><span class="brand-row"><span class="brand brand-owner">mert<span class="trades">erten</span><span class="brand-sub"> · kurulum rehberi</span></span></span></header>
+<main>
+<h1>Sıfırdan kurulum: WSL + Claude Code + OpenCode / Command Code işçileri + herdr + Heeler</h1>
+<section id="nerede" class="where-block" aria-labelledby="nerede-h">
+<h2 id="nerede-h" class="lead-h"><span class="num">1</span> Neyi nerede kullanırsın</h2>
+<div class="where-grid"><svg class="sv" viewBox="0 0 360 470" role="img" aria-labelledby="sv-t sv-d">
+<title id="sv-t">Neyi nerede kullanırsın</title>
+<desc id="sv-d">Telefon, iPad ve Mac Heeler ile Tailscale üzerinden ana PC'deki herdr'a bağlanır. PC'de herdr workspace'lerinde lider Claude oturumları çalışır; Claude lane aracıyla işi sandbox içindeki OpenCode ve Command Code işçilerine verir. İşçi ya da Claude bitince telefona push gelir. Uzun işler isteğe bağlı ikinci makineye gider.</desc>
+<rect class="box box-ok" x="10" y="10" width="340" height="54" rx="8"/><text class="tt" x="20" y="28">Telefon · iPad · Mac — Heeler</text><text class="tm" x="20" y="43">izle · Chat&#39;ten cevap yaz · onay ver · Ctrl+C</text><text class="tm" x="20" y="57">her Claude / işçi bitince push</text>
+<line class="ln ln-ok" x1="120" y1="108" x2="120" y2="70"/><polygon class="arrow-ok" points="116,71 124,71 120,64"/><text class="tm" x="128" y="90">bitti → push</text>
+<line class="ln ln-acc" x1="240" y1="64" x2="240" y2="102"/><polygon class="arrow" points="236,101 244,101 240,108"/><text class="tm" x="248" y="84">Tailscale</text><text class="tm" x="248" y="97">(özel ağ, SSH)</text>
+<rect class="box box-acc" x="10" y="108" width="340" height="292" rx="10"/>
+<text class="tt" x="22" y="127">Ana PC · Windows + WSL</text>
+<rect class="box" x="22" y="136" width="316" height="34" rx="6"/>
+<text class="tt" x="32" y="157">herdr</text>
+<rect class="chip" x="78" y="143" width="72" height="20" rx="10"/><text class="tm" x="114" y="157" text-anchor="middle">proje-a</text>
+<rect class="chip" x="158" y="143" width="72" height="20" rx="10"/><text class="tm" x="194" y="157" text-anchor="middle">proje-b</text>
+<rect class="chip" x="238" y="143" width="72" height="20" rx="10"/><text class="tm" x="274" y="157" text-anchor="middle">lanes</text>
+<rect class="box box-acc" x="22" y="184" width="150" height="58" rx="8"/><text class="tt" x="32" y="202">Claude Code (lider)</text><text class="tm" x="32" y="217">planlar · böler · brief yazar</text><text class="tm" x="32" y="231">diff okur · test + mutant</text>
+<rect class="box " x="188" y="184" width="150" height="58" rx="8"/><text class="tt" x="198" y="202">lane</text><text class="tm" x="198" y="217">worktree · defter</text><text class="tm" x="198" y="231">accept · merge</text>
+<line class="ln ln-acc" x1="172" y1="213" x2="182" y2="213"/><polygon class="arrow" points="181,209 188,213 181,217"/>
+<line class="ln ln-acc" x1="263" y1="242" x2="263" y2="262"/><polygon class="arrow" points="259,261 267,261 263,268"/>
+<rect class="box box-sb" x="22" y="268" width="316" height="120" rx="8"/>
+<text class="tm" x="32" y="285">sandbox (bubblewrap): anahtar yok · git yok · sadece kendi klasörü</text>
+<rect class="box box-ok" x="32" y="296" width="92" height="52" rx="8"/><text class="tt" x="42" y="314">oc-worker-01</text><text class="tm" x="42" y="329">OpenCode</text><text class="tm" x="42" y="343">DeepSeek</text>
+<rect class="box box-ok" x="134" y="296" width="92" height="52" rx="8"/><text class="tt" x="144" y="314">oc-worker-02</text><text class="tm" x="144" y="329">OpenCode</text><text class="tm" x="144" y="343">DeepSeek</text>
+<rect class="box box-ok" x="236" y="296" width="92" height="52" rx="8"/><text class="tt" x="246" y="314">cc-worker-03</text><text class="tm" x="246" y="329">Command Code</text><text class="tm" x="246" y="343">DeepSeek</text>
+<text class="tm" x="32" y="374">bitince: REPORT.md + LANE_RESULT.json → Claude kontrol eder</text>
+<line class="ln" x1="180" y1="400" x2="180" y2="420" stroke-dasharray="4 4"/>
+<rect class="box box-dash" x="10" y="420" width="340" height="42" rx="8"/>
+<text class="tt" x="22" y="438">İkinci makine (isteğe bağlı)</text>
+<text class="tm" x="22" y="453">uzun test · derleme · grid — nice 19, rsync ile gider ve döner</text>
+</svg><ul class="ideas ideas-top"><li class="idea idea-tel"><span class="where">Telefon</span><strong>Her Claude bitince haber</strong><span class="what">Hangi workspace&#39;teki Claude cevabını bitirdiyse telefona push gelir; Heeler&#39;ın Chat görünümünden okur, oradan cevap yazarsın.</span><span class="src">fikir: Claude</span></li><li class="idea idea-pc"><span class="where">PC başında</span><strong>Paralel iş bölümü</strong><span class="what">Lider Claude görevi üç parçaya böler; üç işçi ayrı sandbox&#39;ta aynı anda çalışır, sen herdr&#39;dan izlersin.</span><span class="src">fikir: OpenCode</span></li><li class="idea idea-bg"><span class="where">Arka planda</span><strong>Gece test koşusu</strong><span class="what">Sen uyurken işçiler testleri koşar; sabah Heeler&#39;da başarısız olanları görüp lider oturuma iletirsin.</span><span class="src">fikir: OpenCode</span></li><li class="idea idea-m2"><span class="where">İkinci makine</span><strong>Ağır derleme devri</strong><span class="what">Büyük derlemeyi ya da uzun testi ikinci makineye gönderirsin (nice 19); ana PC akıcı kalır, sonucu telefondan izlersin.</span><span class="src">fikir: OpenCode</span></li><li class="idea idea-all"><span class="where">Her yerde</span><strong>Ucuz model yazar, Claude kontrol eder</strong><span class="what">Kodu ucuz DeepSeek işçileri yazar; Claude diff okur, testi kendisi koşar. Maliyet düşer, kalite düşmez.</span><span class="src">fikir: Claude</span></li></ul></div>
+<p class="more-h">Diğer fikirler (25): aç ve bak</p>
+<details class="more"><summary><span class="num">2</span> Telefonda <span class="cnt">7 fikir</span></summary><ul class="ideas"><li class="idea idea-tel"><span class="where">Telefon</span><strong>Onay bekleyen Claude</strong><span class="what">Claude bir izin isteyince (ör. git push) sekme &quot;bekliyor&quot; olur; telefondan bakıp onay ya da ret verirsin.</span><span class="src">fikir: Claude</span></li><li class="idea idea-tel"><span class="where">Telefon</span><strong>İşçiler ne durumda</strong><span class="what">lanes workspace&#39;inde her işçi bir sekme: hangisi çalışıyor, hangisi bitti, telefondan tek bakışta.</span><span class="src">fikir: Claude</span></li><li class="idea idea-tel"><span class="where">Telefon</span><strong>Yolda kod incele</strong><span class="what">Claude oturumu bitince bildirim gelir, telefondan diff&#39;e bakıp onaylarsın; dizüstünü açman gerekmez.</span><span class="src">fikir: OpenCode</span></li><li class="idea idea-tel"><span class="where">Telefon</span><strong>Toplantı arası yönlendirme</strong><span class="what">Toplantı çıkışında push gelir; lider Claude&#39;a kısa bir cevapla bir sonraki görevi verirsin.</span><span class="src">fikir: OpenCode</span></li><li class="idea idea-tel"><span class="where">Telefon</span><strong>Kırık test haberi</strong><span class="what">Claude&#39;a &quot;testleri koş, kırılanı düzelt&quot; dersin; bitince push gelir, sonucu telefondan okursun.</span><span class="src">fikir: OpenCode</span></li><li class="idea idea-tel"><span class="where">Telefon</span><strong>Yürüyüşte gözden geçirme</strong><span class="what">Biten işin özeti gelir; iPhone dikte ile konuşarak küçük düzeltmeyi Claude&#39;a söylersin.</span><span class="src">fikir: OpenCode</span></li><li class="idea idea-tel"><span class="where">Telefon</span><strong>Yanlış yöne gideni durdur</strong><span class="what">Heeler&#39;da işçinin pane&#39;ine bağlanıp Ctrl+C ile durdurursun; lane defteri yarım kalanı tutar, sonra yeniden başlatılır.</span><span class="src">fikir: OpenCode</span></li></ul></details><details class="more"><summary><span class="num">3</span> PC başında <span class="cnt">6 fikir</span></summary><ul class="ideas"><li class="idea idea-pc"><span class="where">PC başında</span><strong>Konu başına workspace</strong><span class="what">Her proje ayrı herdr workspace&#39;i ve ayrı Claude hafızası: projeler, bağlamlar birbirine karışmaz.</span><span class="src">fikir: Claude</span></li><li class="idea idea-pc"><span class="where">PC başında</span><strong>Önce plan, sonra kod</strong><span class="what">Büyük değişiklikte Shift+Tab ile plan modu: Claude önce planı gösterir, onaydan sonra yazar.</span><span class="src">fikir: Claude</span></li><li class="idea idea-pc"><span class="where">PC başında</span><strong>Sabah oturum açılışı</strong><span class="what">Lider Claude&#39;u başlatıp herdr sekmelerinde dünkü işçilerin çıktısını tek ekranda toplarsın.</span><span class="src">fikir: OpenCode</span></li><li class="idea idea-pc"><span class="where">PC başında</span><strong>Sandbox&#39;ta güvenli deneme</strong><span class="what">Riskli bir betiği işçiye denetirsin: sadece kendi worktree&#39;si yazılabilir, ana WSL ve anahtarlar görünmez.</span><span class="src">fikir: OpenCode</span></li><li class="idea idea-pc"><span class="where">PC başında</span><strong>Sekme düzeni</strong><span class="what">herdr&#39;da dört Claude oturumu ayrı sekmede durur; biten oturumu sekmedeki durum göstergesinden anında görürsün.</span><span class="src">fikir: OpenCode</span></li><li class="idea idea-pc"><span class="where">PC başında</span><strong>Kod inceleme kuyruğu</strong><span class="what">Biten işçi sonuçları lane defterinde sıraya girer; tek tek diff okuyup lider oturumda birleştirirsin.</span><span class="src">fikir: OpenCode</span></li></ul></details><details class="more"><summary><span class="num">4</span> Arka planda ve ikinci makinede <span class="cnt">7 fikir</span></summary><ul class="ideas"><li class="idea idea-bg"><span class="where">Arka planda</span><strong>Gece kuyruğu</strong><span class="what">lane queue ile 10 işi sıraya koy; kota biterse kendisi durur, sabah ACCEPT_REPORT&#39;ları oku.</span><span class="src">fikir: Claude</span></li><li class="idea idea-bg"><span class="where">Arka planda</span><strong>Mutant bekçisi</strong><span class="what">İşçinin &quot;testler geçti&quot; cümlesini lane accept + mutantlar doğrular; yeşil ama boş test yakalanır.</span><span class="src">fikir: Claude</span></li><li class="idea idea-bg"><span class="where">Arka planda</span><strong>Bağımlılık güncelleme</strong><span class="what">Bir işçi gece paket güncellemesini dener; kırılan testleri sabah rapor olarak sunar.</span><span class="src">fikir: OpenCode</span></li><li class="idea idea-bg"><span class="where">Arka planda</span><strong>Göç provası</strong><span class="what">İşçi göç betiğini kendi worktree&#39;sindeki test veritabanına karşı dener, sonucu REPORT.md&#39;ye yazar; sabah lider okur.</span><span class="src">fikir: OpenCode</span></li><li class="idea idea-bg"><span class="where">Arka planda</span><strong>Değişiklik notu</strong><span class="what">İşçi kod değişikliklerinden changelog yazar; bitince push gelir, telefondan yayına onay verirsin.</span><span class="src">fikir: OpenCode</span></li><li class="idea idea-m2"><span class="where">İkinci makine</span><strong>Test ortamı kopyası</strong><span class="what">İkinci makinede ayrı veritabanıyla işçi koşturur, üretim verisine dokunmadan göçü doğrularsın.</span><span class="src">fikir: OpenCode</span></li><li class="idea idea-m2"><span class="where">İkinci makine</span><strong>Ayrı proje, ayrı makine</strong><span class="what">İkinci makinede kendi Claude&#39;u ve herdr workspace&#39;i olan ayrı bir proje yürür; herdr kenar çubuğundan iki makine arasında geçersin.</span><span class="src">fikir: OpenCode</span></li></ul></details><details class="more"><summary><span class="num">5</span> Her yerde <span class="cnt">5 fikir</span></summary><ul class="ideas"><li class="idea idea-all"><span class="where">Her yerde</span><strong>Yeniden başlatma sonrası 2 dakika</strong><span class="what">WezTerm → WSL → herdr → claude -c: her şey kaldığı yerden devam eder.</span><span class="src">fikir: Claude</span></li><li class="idea idea-all"><span class="where">Her yerde</span><strong>Okuma soruları işçiye</strong><span class="what">&quot;Bu repoda X nerede?&quot; gibi salt okunur soruları oc-worker&#39;a sor; Claude&#39;un bağlamı asıl işe kalır.</span><span class="src">fikir: Claude</span></li><li class="idea idea-all"><span class="where">Her yerde</span><strong>Fikri hemen kaydet</strong><span class="what">iPad&#39;de Heeler&#39;ı açar, Claude oturumuna tek satırlık bir fikir atarsın; Claude bir işçiye prototip yaptırır.</span><span class="src">fikir: OpenCode</span></li><li class="idea idea-all"><span class="where">Her yerde</span><strong>Mac&#39;te devam</strong><span class="what">Kafeden Mac ile bağlanır, aynı herdr oturumuna düşüp kaldığın yerden liderle konuşursun.</span><span class="src">fikir: OpenCode</span></li><li class="idea idea-all"><span class="where">Her yerde</span><strong>Sesli brifing</strong><span class="what">Sabah kahvede iPad&#39;e dikte ile anlatırsın; lider Claude notları görevlere çevirip işçilere dağıtır.</span><span class="src">fikir: OpenCode</span></li></ul></details>
+</section>
+<section id="parcalar" class="intros" aria-labelledby="parcalar-h">
+<h2 id="parcalar-h" class="lead-h">Parçalar: hangisi ne yapar?</h2>
+<p class="more-h">Bir parçanın üstüne tıkla: kısa anlatım ve küçük bir şema açılır.</p>
+<details class="intro" id="ne-heeler"><summary><span class="iname">Heeler ne yapar?</span><span class="itag">Telefondan herdr: izle, cevapla, bildirim al</span></summary>
+<div class="ibody"><div class="isv"><svg class="sv" viewBox="0 0 360 220" role="img" aria-label="Heeler bağlantı akışı">
+  <title>Heeler bağlantı akışı</title>
+  <rect class="box box-acc" x="10" y="10" width="150" height="56" rx="8"/>
+  <text class="tt" x="22" y="28">iPhone · iPad · Mac</text>
+  <text class="tm" x="22" y="43">Heeler uygulaması</text>
+  <text class="tm" x="22" y="58">SSH anahtarı cihazda</text>
+  <line class="ln ln-acc" x1="160" y1="38" x2="194" y2="38"/>
+  <polygon class="arrow" points="193,34 193,42 200,38"/>
+  <rect class="box" x="200" y="10" width="150" height="56" rx="8"/>
+  <text class="tt" x="212" y="28">Tailscale</text>
+  <text class="tm" x="212" y="43">özel ağ</text>
+  <text class="tm" x="212" y="58">sadece kendi cihazlar</text>
+  <line class="ln ln-acc" x1="275" y1="66" x2="275" y2="79"/>
+  <polygon class="arrow" points="271,78 279,78 275,85"/>
+  <rect class="box" x="200" y="85" width="150" height="56" rx="8"/>
+  <text class="tt" x="212" y="103">Windows OpenSSH</text>
+  <text class="tm" x="212" y="118">port 22 · sadece tailnet</text>
+  <text class="tm" x="212" y="133">şifre kapalı</text>
+  <line class="ln ln-acc" x1="275" y1="141" x2="275" y2="146"/>
+  <polygon class="arrow" points="271,145 279,145 275,152"/>
+  <rect class="box box-ok" x="200" y="150" width="150" height="60" rx="8"/>
+  <text class="tt" x="212" y="168">WSL sshd ve herdr</text>
+  <text class="tm" x="212" y="183">localhost:2222</text>
+  <text class="tm" x="212" y="198">Herdr TUI</text>
+  <line class="ln ln-ok" x1="196" y1="180" x2="166" y2="180"/>
+  <polygon class="arrow-ok" points="167,176 167,184 160,180"/>
+  <rect class="box box-dash" x="10" y="150" width="150" height="60" rx="8"/>
+  <text class="tt" x="22" y="168">Chat ve push</text>
+  <text class="tm" x="22" y="183">paylaşılan sohbet</text>
+  <text class="tm" x="22" y="198">iş bitince bildirim</text>
+</svg></div><div class="itext">
+<h3>Ne yapar</h3><ul><li>iPhone, iPad ve Mac için bir uygulamadır; herdr&#39;a SSH ile bağlanıp PC&#39;ndeki terminalleri ve Claude oturumlarını gösterir.</li><li>Canlı terminal görünümü bir pane&#39;e bağlanır; telefondan bağlanınca PC&#39;deki o pane&#39;i devralabilir.</li><li>Chat görünümü Claude ve ajan oturumlarını paylaşır; başkasının görünümünü devralmadan okursun.</li><li>Pane &#39;bitti&#39; olunca Heeler eklentisi uçtan uca şifreli bir push gönderir; eklenti Node 20 ve üstü ister.</li></ul>
+<h3>Nasıl kullanırsın</h3><ul><li>Hangi Claude ya da işçinin çalıştığını, beklediğini veya bittiğini görürsün; cevabı okuyup karşılığını yazabilirsin.</li><li>iPhone diktesiyle cevap yazabilir, izin isteğini onaylayabilir, yanlış giden bir işçiye Ctrl+C gönderebilirsin.</li><li>Her cihazda uygulamanın ürettiği ayrı bir SSH anahtarı vardır; açık anahtarı Windows&#39;a ve WSL&#39;e eklersin, şifreyle giriş kapalıdır.</li></ul>
+<p><strong>Nerede:</strong> PC&#39;de WSL içinde çalışan herdr sunucusuna bağlanır; her şey PC&#39;de çalışır, sen sadece telefon, iPad veya Mac&#39;ten izlersin.</p>
+<p class="inot"><strong>Ne değildir:</strong> Ayrı bir yapay zekâ değildir ve ajanları kendisi çalıştırmaz; PC ya da WSL kapalıysa bağlanacak bir şey yoktur.</p>
+</div></div></details>
+<details class="intro" id="ne-herdr"><summary><span class="iname">herdr ne yapar?</span><span class="itag">Terminal çalışma alanı: workspace, sekme, pane</span></summary>
+<div class="ibody"><div class="isv"><svg class="sv" viewBox="0 0 360 240" role="img" aria-label="Herdr çalışma alanı akışı">
+  <title>Herdr çalışma alanı akışı</title>
+  <rect class="box box-acc" x="10" y="10" width="100" height="50" rx="8"/>
+  <text class="tt" x="22" y="28">workspace</text>
+  <text class="tm" x="22" y="43">proje konusu</text>
+  <line class="ln ln-acc" x1="110" y1="35" x2="124" y2="35"/>
+  <polygon class="arrow" points="123,31 123,39 130,35"/>
+  <rect class="box box-acc" x="130" y="10" width="100" height="50" rx="8"/>
+  <text class="tt" x="142" y="28">sekme</text>
+  <text class="tm" x="142" y="43">bir iş</text>
+  <line class="ln ln-acc" x1="230" y1="35" x2="244" y2="35"/>
+  <polygon class="arrow" points="243,31 243,39 250,35"/>
+  <rect class="box box-acc" x="250" y="10" width="100" height="50" rx="8"/>
+  <text class="tt" x="262" y="28">pane</text>
+  <text class="tm" x="262" y="43">terminal</text>
+  <line class="ln ln-ok" x1="180" y1="60" x2="180" y2="84"/>
+  <polygon class="arrow-ok" points="176,83 184,83 180,90"/>
+  <rect class="box box-ok" x="130" y="90" width="100" height="58" rx="8"/>
+  <text class="tt" x="142" y="108">durum</text>
+  <text class="tm" x="142" y="123">çalışıyor</text>
+  <text class="tm" x="142" y="138">bekliyor · bitti</text>
+  <line class="ln ln-ok" x1="300" y1="60" x2="300" y2="163"/>
+  <polygon class="arrow-ok" points="296,163 304,163 300,170"/>
+  <text class="tm" x="10" y="161">Önek Ctrl+b: c yeni sekme, v sağa böl, q ayır</text>
+  <line class="ln ln-acc" x1="160" y1="198" x2="194" y2="198"/>
+  <polygon class="arrow" points="193,194 193,202 200,198"/>
+  <rect class="box" x="10" y="170" width="150" height="56" rx="8"/>
+  <text class="tt" x="22" y="188">WezTerm · Heeler</text>
+  <text class="tm" x="22" y="203">aynı oturuma bağlanır</text>
+  <text class="tm" x="22" y="218">kapatmak durdurmaz</text>
+  <rect class="box box-sb" x="200" y="170" width="150" height="56" rx="8"/>
+  <text class="tt" x="212" y="188">herdr sunucusu</text>
+  <text class="tm" x="212" y="203">pane'ler burada yaşar</text>
+  <text class="tm" x="212" y="218">systemd ile açılır</text>
+</svg></div><div class="itext">
+<h3>Ne yapar</h3><ul><li>Her makinede çalışan bir terminal çalışma alanı sunucusudur; her konu bir workspace, her iş bir sekme, her terminal bir pane olur.</li><li>Terminali kapatsan da içindeki işler durmaz; pane&#39;ler sunucuda çalışmaya devam eder ve WezTerm, Heeler ya da başka makine aynı oturuma bağlanır.</li><li>Sekmede Claude Code ve OpenCode için çalışıyor, bekliyor, bitti durumunu gösterir; entegrasyonu herdr integration install claude ile kurarsın.</li><li>Ctrl+b önekinden sonra c yeni sekme, v sağa bölme, - aşağı bölme, q ayırma, ? tüm tuşlar demektir; fare de çalışır.</li></ul>
+<h3>Nasıl kullanırsın</h3><ul><li>Proje başına bir workspace açarsın; lanes workspace&#39;inde her işçi kendi sekmesinde çalışır ve logunu orada izlersin.</li><li>herdr machine add ile ikinci makinenin herdr&#39;ını aynı kenar çubuğunda görürsün; herdr-server systemd servisi WSL açılınca kendiliğinden gelir.</li><li>Soket her pane&#39;e yazabildiği için onu asla sandbox&#39;taki bir işçiye vermezsin; üretimdeki canlı işleri (bot, sunucu) ise herdr içinde değil, ayrı servis olarak çalıştırırsın.</li></ul>
+<p><strong>Nerede:</strong> Her makinede, PC&#39;de ise WSL içinde çalışır; sen ona WezTerm&#39;den, Heeler&#39;dan veya başka bir makineden bağlanırsın.</p>
+<p class="inot"><strong>Ne değildir:</strong> Bir yapay zekâ değildir ve tmux yapılandırmasıyla uyumlu değildir; burası senin yapay zekâ oturumlarının yaşadığı yerdir.</p>
+</div></div></details>
+<details class="intro" id="ne-claude"><summary><span class="iname">Claude Code ne yapar?</span><span class="itag">Terminalde çalışan lider ajan: planlar, böler, denetler</span></summary>
+<div class="ibody"><div class="isv"><svg class="sv" viewBox="0 0 360 210" role="img" aria-label="Claude Code lider olarak planlar, diff okur, test ve mutant koşar, sonra merge eder">
+<title>Claude Code akışı: sen iş söylersin, Claude planlar, işçiler yazar, Claude denetler</title>
+<rect class="box" x="10" y="10" width="340" height="44" rx="8"/>
+<text class="tt" x="22" y="28">Sen bir iş söylersin</text>
+<text class="tm" x="22" y="44">Claude Code · lider</text>
+<line class="ln" x1="180" y1="54" x2="180" y2="71"/>
+<polygon class="arrow" points="176,70 184,70 180,78"/>
+<rect class="box box-acc" x="10" y="78" width="340" height="48" rx="8"/>
+<text class="tt" x="22" y="96">Claude planlar, dosya bazında böler</text>
+<text class="tm" x="22" y="112">brief yazar, işçilere verir</text>
+<line class="ln" x1="180" y1="126" x2="180" y2="136"/>
+<line class="ln" x1="90" y1="136" x2="270" y2="136"/>
+<line class="ln ln-ok" x1="90" y1="136" x2="90" y2="139"/>
+<line class="ln ln-ok" x1="270" y1="136" x2="270" y2="139"/>
+<polygon class="arrow-ok" points="86,139 94,139 90,146"/>
+<polygon class="arrow-ok" points="266,139 274,139 270,146"/>
+<rect class="box box-ok" x="10" y="146" width="160" height="48" rx="8"/>
+<text class="tt" x="22" y="164">Her diff okunur</text>
+<text class="tm" x="22" y="180">test + mutant koşar</text>
+<rect class="box box-ok" x="190" y="146" width="160" height="48" rx="8"/>
+<text class="tt" x="202" y="164">Commit + merge</text>
+<text class="tm" x="202" y="180">ancak testler geçince</text>
+</svg></div><div class="itext">
+<h3>Ne yapar</h3><ul><li>Terminalde çalışır; bu düzende liderdir, işi planlar ve dosya bazında parçalara böler.</li><li>Her işçi için brief yazar, gelen her diff&#39;i okur ve testleri kendi eliyle koşar.</li><li>Testlerin gerçekten işe yaradığını görmek için mutant ekler; işçinin &quot;testler geçti&quot; sözüne güvenmez.</li><li>Biten işi commit eder ve merge eder; bunu ancak testler ve mutantlar geçince yapar.</li><li>Her oturumda ~/.claude/CLAUDE.md, ~/.claude/rules/*.md ve proje CLAUDE.md dosyalarını okur.</li></ul>
+<h3>Nasıl kullanırsın</h3><ul><li>Bir konu için klasöründe claude başlatırsın; her konunun kendi klasörü ve kendi herdr workspace&#39;i vardır.</li><li>Büyük değişiklikten önce Shift+Tab ile plan moduna alırsın: önce plan, onaydan sonra kod.</li><li>claude -c son konuşmayı, claude -r ise geçmiş bir oturumu açar.</li><li>Riskli işlerde önce sorar; izinleri ve yasakları ~/.claude/settings.json dosyası anlatır.</li></ul>
+<p><strong>Nerede:</strong> WSL içindeki terminalde, her projenin kendi klasöründe ve kendi herdr workspace&#39;inde çalışır.</p>
+<p class="inot"><strong>Ne değildir:</strong> Ucuz işçi değildir: pahalı modeldir, bu yüzden zamanını planlamaya ve denetlemeye harcar, kodu işçiler yazar.</p>
+</div></div></details>
+<details class="intro" id="ne-lane"><summary><span class="iname">lane ne yapar?</span><span class="itag">İşçiye iş veren, sonucu ölçen ve merge eden küçük araç</span></summary>
+<div class="ibody"><div class="isv"><svg class="sv" viewBox="0 0 360 290" role="img" aria-label="lane akışı: worktree aç, işçiyi çalıştır, raporu al, accept ile denetle, merge et">
+<title>lane akışı: yeni lane, işçi çalışır, rapor yazar, accept denetler, merge birleştirir</title>
+<rect class="box box-acc" x="10" y="10" width="340" height="42" rx="8"/>
+<text class="tt" x="22" y="28">lane new</text>
+<text class="tm" x="22" y="44">worktree + dal + defter kaydı</text>
+<line class="ln" x1="180" y1="52" x2="180" y2="60"/>
+<polygon class="arrow" points="176,59 184,59 180,66"/>
+<rect class="box" x="10" y="66" width="340" height="42" rx="8"/>
+<text class="tt" x="22" y="84">lane run · brief işçiye</text>
+<text class="tm" x="22" y="100">bekler, sonuç sözleşmesini doğrular</text>
+<line class="ln" x1="180" y1="108" x2="180" y2="116"/>
+<polygon class="arrow" points="176,115 184,115 180,122"/>
+<rect class="box" x="10" y="122" width="340" height="42" rx="8"/>
+<text class="tt" x="22" y="140">İşçi raporu</text>
+<text class="tm" x="22" y="156">.lane/REPORT.md + LANE_RESULT.json</text>
+<line class="ln" x1="180" y1="164" x2="180" y2="172"/>
+<polygon class="arrow" points="176,171 184,171 180,178"/>
+<rect class="box box-ok" x="10" y="178" width="340" height="42" rx="8"/>
+<text class="tt" x="22" y="196">lane accept</text>
+<text class="tm" x="22" y="212">testleri ve mutantları yeniden koşar</text>
+<line class="ln ln-ok" x1="180" y1="220" x2="180" y2="228"/>
+<polygon class="arrow-ok" points="176,227 184,227 180,234"/>
+<rect class="box box-ok" x="10" y="234" width="340" height="42" rx="8"/>
+<text class="tt" x="22" y="252">lane merge</text>
+<text class="tm" x="22" y="268">testler geçerse ana dala girer</text>
+</svg></div><div class="itext">
+<h3>Ne yapar</h3><ul><li>Küçük bir Python komut satırı aracıdır; sadece standart kütüphaneyi kullanır, ek bağımlılık istemez.</li><li>Her lane için bir git worktree, bir dal ve bir brief açar; deftere de kaydeder.</li><li>İşçiyi çalıştırır, sonucu bekler ve doğrular: senin test komutlarını ve mutantları yeniden koşar.</li><li>Sadece kabul edilen lane&#39;i ana dala merge eder; testler düşerse geri alır.</li><li>İşçiden .lane/REPORT.md ve .lane/LANE_RESULT.json bekler; lider transkript yerine kısa rapor okur.</li></ul>
+<h3>Nasıl kullanırsın</h3><ul><li>Genelde komutları elle yazmazsın: Claude&#39;a &quot;şunu iki lane&#39;e böl&quot; dersin, lane aracını o kullanır.</li><li>Bir iş bitince lane accept ile testler ve mutantlar koşulur, ardından lane merge gelir.</li><li>Aynı anda yaklaşık 5 lane çalışır; işler dosya bazında bölünür ki kimse aynı dosyaya dokunmasın.</li><li>lane ls defteri gösterir, lane gc ise silinebilecekleri önce kuru çalıştırmayla listeler.</li></ul>
+<p><strong>Nerede:</strong> WSL içinde çalışan küçük bir Python aracıdır; işçilerin worktree&#39;lerini ve lane defterini yönetir.</p>
+<p class="inot"><strong>Ne değildir:</strong> Yapay zekâ değildir: kodu üretmez, sadece Claude ile işçiler arasındaki defteri tutar ve sonucu denetler.</p>
+</div></div></details>
+<details class="intro" id="ne-opencode"><summary><span class="iname">OpenCode ne yapar?</span><span class="itag">Varsayılan işçi: sandbox içinde kod yazar, sen kontrol edersin</span></summary>
+<div class="ibody"><div class="isv"><svg class="sv" viewBox="0 0 360 300" role="img" aria-label="OpenCode işçisinin akışı">
+<title>OpenCode işçisi nasıl çalışır</title>
+<rect class="box box-acc" x="10" y="10" width="340" height="48" rx="8"/>
+<text class="tt" x="22" y="28">wezterm · herdr · lane</text>
+<text class="tm" x="22" y="44">senin bulunduğun yer</text>
+<line class="ln ln-acc" x1="180" y1="58" x2="180" y2="76"/><polygon class="arrow" points="176,75 184,75 180,82"/>
+<rect class="box box-ok" x="10" y="88" width="340" height="48" rx="8"/>
+<text class="tt" x="22" y="106">oc-worker</text>
+<text class="tm" x="22" y="122">soru: oc-worker · yazma: --write</text>
+<line class="ln ln-acc" x1="180" y1="136" x2="180" y2="154"/><polygon class="arrow" points="176,153 184,153 180,160"/>
+<rect class="box box-sb" x="10" y="166" width="340" height="62" rx="8"/>
+<text class="tt" x="22" y="184">bubblewrap sandbox</text>
+<text class="tm" x="22" y="199">sandbox: sadece kendi klasörü</text>
+<text class="tm" x="22" y="214">anahtar kabuğa sızmaz · .git salt okunur</text>
+<line class="ln ln-ok" x1="180" y1="228" x2="180" y2="246"/><polygon class="arrow-ok" points="176,245 184,245 180,252"/>
+<rect class="box box-dash" x="10" y="258" width="340" height="34" rx="8"/>
+<text class="tt" x="22" y="280">sonuç: diff + test → lider Claude kontrol eder</text>
+</svg></div><div class="itext">
+<h3>Ne yapar</h3><ul><li>Açık kaynak bir kodlama ajanı; bu düzende varsayılan işçi, oc-worker sarmalayıcısıyla başlar.</li><li>Modeli OpenCode Go aboneliğinde DeepSeek V4.1 Flash; model kimliği opencode-go/deepseek-v4.1-flash ve ucuz, çünkü her sonuç yeniden test edilir.</li><li>Kendi küçük sandbox&#39;ında çalışır: sadece işletim sistemi, program dosyaları ve kendi lane klasörü vardır; ev dizininin gerisi görünmez.</li><li>Salt okuma modunda soru cevaplar, yazma modunda yalnızca kendi worktree&#39;sinde dosya değiştirir; .git salt okunur olduğu için commit atamaz.</li><li>Anahtar dosya tanıtıcısı 3 ile bir kez okunur; bir eklenti her kabukta anahtarı boşaltır, ajan kabukları ayrı bir isim alanında çalışır.</li></ul>
+<h3>Nasıl kullanırsın</h3><ul><li>Sorular için oc-worker &quot;soru&quot;, yazma işleri için oc-worker --write &quot;görev&quot; yazarsın; genelde lane run başlatır.</li><li>Her değişiklikten sonra check.sh sandbox&#39;ı düz bash denemeleriyle sınar ve 17/17 beklenir.</li><li>Sonucu lider Claude okur, diff&#39;i ve testleri kendisi doğrular; işçiye güvenilmez.</li></ul>
+<p><strong>Nerede:</strong> WSL içindeki bubblewrap sandbox&#39;ında, kendi worktree klasöründe çalışır; sen onu wezterm/herdr&#39;dan ya da lane ile başlatırsın.</p>
+<p class="inot"><strong>Ne değildir:</strong> Güvenilir bir ajan değildir: ağ model API&#39;si için açıktır, bu yüzden repoya yalnızca üçüncü bir kişiye göstereceğin şeyi koy.</p>
+</div></div></details>
+<details class="intro" id="ne-commandcode"><summary><span class="iname">Command Code ne yapar?</span><span class="itag">Yedek işçi: aynı sandbox, farklı komut, aynı kurallar</span></summary>
+<div class="ibody"><div class="isv"><svg class="sv" viewBox="0 0 360 300" role="img" aria-label="Command Code yedek işçisinin akışı">
+<title>Command Code yedek işçisi nasıl çalışır</title>
+<rect class="box box-acc" x="10" y="10" width="340" height="48" rx="8"/>
+<text class="tt" x="22" y="28">cmd · cc-worker</text>
+<text class="tm" x="22" y="44">yedek işçi, aynı arayüz</text>
+<line class="ln ln-acc" x1="180" y1="58" x2="180" y2="76"/><polygon class="arrow" points="176,75 184,75 180,82"/>
+<rect class="box box-ok" x="10" y="88" width="340" height="48" rx="8"/>
+<text class="tt" x="22" y="106">cc-worker</text>
+<text class="tm" x="22" y="122">görev: --write · soru: salt okuma</text>
+<line class="ln ln-acc" x1="180" y1="136" x2="180" y2="154"/><polygon class="arrow" points="176,153 184,153 180,160"/>
+<rect class="box box-sb" x="10" y="166" width="340" height="62" rx="8"/>
+<text class="tt" x="22" y="184">bubblewrap sandbox</text>
+<text class="tm" x="22" y="199">anahtar 3. tanıtıcıdan, alt süreçlerde yok</text>
+<text class="tm" x="22" y="214">izin dosyası salt okunur</text>
+<line class="ln ln-ok" x1="180" y1="228" x2="180" y2="246"/><polygon class="arrow-ok" points="176,245 184,245 180,252"/>
+<rect class="box box-dash" x="10" y="258" width="340" height="34" rx="8"/>
+<text class="tt" x="22" y="280">sonuç: diff + test → lider Claude kontrol eder</text>
+</svg></div><div class="itext">
+<h3>Ne yapar</h3><ul><li>Bir kodlama ajanı komut satırı aracı; bu düzende yedek işçi ve cc-worker sarmalayıcısıyla, oc-worker ile aynı arayüzde çalışır.</li><li>Modeli deepseek/deepseek-v4.1-flash; ayrıca bir GLM Flash modeli de denendi ve çalıştı, model listesini cmd --list-models verir.</li><li>Aynı sandbox tasarımı: yalnızca işletim sistemi, salt okunur program dosyaları ve kendi lane klasörü görünür.</li><li>Anahtar 3 numaralı dosya tanıtıcısından gelir; küçük bir Node ön yükleyici onu süreçte tutar ve her alt süreçten siler, böylece /proc/self/environ içinde görünmez.</li><li>Yazma modunda kendi izin dosyası salt okunur bağlanır, yani kendi kurallarını değiştiremez.</li></ul>
+<h3>Nasıl kullanırsın</h3><ul><li>Görev için cc-worker &quot;görev&quot;, soru için salt okuma modu; ikisi de oc-worker ile aynı arayüzü kullanır.</li><li>Etkileşimli de kullanılır: cmd başlatır, cmd -c oturumu sürdürür, cmd -r bir oturum seçer; işçi olarak her zaman cc-worker ile.</li><li>check.sh bu sandbox&#39;ı 17/17 ile doğrular; sonucu yine lider Claude kontrol eder.</li></ul>
+<p><strong>Nerede:</strong> WSL içindeki aynı bubblewrap sandbox&#39;ında, kendi worktree klasöründe çalışır; işçi olarak cc-worker ile başlatılır.</p>
+<p class="inot"><strong>Ne değildir:</strong> Liderin yerini almaz: tıpkı OpenCode gibi yalnızca kod yazar, yazdığı kodu Claude kontrol eder.</p>
+</div></div></details>
+<details class="intro" id="ne-tailscale"><summary><span class="iname">Tailscale ne yapar?</span><span class="itag">Kendi cihazların arasında özel ağ: telefondan PC’ye güvenle bağlan</span></summary>
+<div class="ibody"><div class="isv"><svg class="sv" viewBox="0 0 360 240" role="img" aria-label="Tailscale özel ağ akışı">
+  <title>Tailscale özel ağ akışı</title>
+  <rect class="box" x="10" y="10" width="340" height="56" rx="8"/>
+  <text class="tt" x="22" y="28">Evdeki ve yoldaki cihazlar</text>
+  <text class="tm" x="22" y="43">PC · telefon · iPad · Mac</text>
+  <line class="ln ln-acc" x1="180" y1="66" x2="180" y2="84"/>
+  <polygon class="arrow" points="176,83 184,83 180,90"/>
+  <rect class="box box-acc" x="10" y="90" width="340" height="60" rx="8"/>
+  <text class="tt" x="22" y="108">Tailscale özel ağı</text>
+  <text class="tm" x="22" y="123">her cihazın sabit bir adı var (MagicDNS)</text>
+  <line class="ln ln-acc" x1="180" y1="150" x2="180" y2="168"/>
+  <polygon class="arrow" points="176,167 184,167 180,174"/>
+  <rect class="box box-ok" x="10" y="174" width="340" height="56" rx="8"/>
+  <text class="tt" x="22" y="192">PC’de SSH (port 22)</text>
+  <text class="tm" x="22" y="207">yalnızca özel ağda, internete kapalı</text>
+</svg></div><div class="itext">
+<h3>Ne yapar</h3><ul><li>PC, ikinci makine, telefon, iPad ve Mac aynı özel ağda görünür; her cihaz sabit ve akılda kalıcı bir isim alır.</li><li>İnternete hiçbir port açılmaz; Windows’taki SSH (22) yalnızca Özel ağ profilinde, yani Tailscale tarafında dinler.</li><li>Heeler telefonda bu ağ sayesinde PC’ye her yerden ulaşır: mobil veri ya da kafe wifi fark etmez.</li><li>Kurulum basit: Windows’a ve telefona uygulamayı kur, aynı hesapla giriş yap; WSL mirrored modda ağı görür.</li><li>ACL kurallarıyla kimin neye SSH açabileceğini sınırlayabilirsin; Heeler kendi uygulama içi Tailscale’iyle bağlanırsa ayrı cihaz sayılır.</li></ul>
+<h3>Nasıl kullanırsın</h3><ul><li>Windows ve telefona Tailscale’i kur, iki tarafta da aynı hesapla giriş yap.</li><li>Cihaz adlarını yönetim panelinden kısa tut; MagicDNS açık kalsın, böylece isimle bağlanabilirsin.</li><li>Günlük kullanımda hiçbir şey yapmana gerek yok: ağ açıkken Heeler’a PC’nin adını ver, gerisini Tailscale halleder.</li></ul>
+<p><strong>Nerede:</strong> Windows PC’de, telefonda ve iPad/Mac’te çalışır; WSL içinden de görünür, böylece her cihaz aynı özel ağa bağlanır.</p>
+<p class="inot"><strong>Ne değildir:</strong> İnternette gezinmeyi gizleyen bir VPN değildir; yalnızca kendi cihazlarını birbirine bağlar, başka sitelere açılan bir tünel değil.</p>
+</div></div></details>
+<details class="intro" id="ne-wezterm"><summary><span class="iname">WezTerm ne yapar?</span><span class="itag">Windows&#39;ta terminal: WSL&#39;i ve herdr&#39;ı tek pencereden aç</span></summary>
+<div class="ibody"><div class="isv"><svg class="sv" viewBox="0 0 360 236" role="img" aria-label="WezTerm akışı: Windows, WSL ve herdr">
+  <title>WezTerm akışı: Windows, WSL ve herdr</title>
+  <rect class="box" x="10" y="10" width="340" height="58" rx="8"/>
+  <text class="tt" x="22" y="28">WezTerm · Windows terminali</text>
+  <text class="tm" x="22" y="43">Alt+L menüsü: WSL, WSL + herdr, PowerShell</text>
+  <line class="ln ln-acc" x1="180" y1="68" x2="180" y2="86"/>
+  <polygon class="arrow" points="176,85 184,85 180,92"/>
+  <rect class="box box-acc" x="10" y="92" width="340" height="58" rx="8"/>
+  <text class="tt" x="22" y="110">WSL Ubuntu</text>
+  <text class="tm" x="22" y="125">komutları burada çalıştırırsın</text>
+  <line class="ln ln-ok" x1="180" y1="150" x2="180" y2="168"/>
+  <polygon class="arrow-ok" points="176,167 184,167 180,174"/>
+  <rect class="box box-ok" x="10" y="174" width="340" height="52" rx="8"/>
+  <text class="tt" x="22" y="192">herdr çalışma alanları</text>
+  <text class="tm" x="22" y="207">sekme ve ajanlar; pencere kapansa da sürer</text>
+</svg></div><div class="itext">
+<h3>Ne yapar</h3><ul><li>Windows için bir terminal programıdır; kurulumu winget install wez.wezterm komutuyla yapılır.</li><li>Doğrudan WSL Ubuntu&#39;yu açar; Alt+L ile menüden WSL, WSL + herdr veya PowerShell seçebilirsin.</li><li>İçinde herdr komutunu çalıştırıp çalışma alanlarına bağlanırsın; WezTerm&#39;i kapatsan da herdr ve ajanlar çalışmaya devam eder.</li><li>herdr&#39;ın öneki Ctrl+b olduğu için WezTerm&#39;de Ctrl+b&#39;yi başka bir şeye bağlamamalısın; kopyala Ctrl+Shift+C, yapıştır Ctrl+Shift+V.</li><li>Yeniden başlatınca WezTerm&#39;i aç, Alt+L ile WSL&#39;i seç; o giriş herdr ve sshd kullanıcı servislerini de başlatır.</li></ul>
+<h3>Nasıl kullanırsın</h3><ul><li>Günlük akış: WezTerm&#39;i aç, Alt+L menüsünden WSL&#39;i seç, sonra herdr yazıp çalışma alanlarına atla.</li><li>Yapılandırma dosyası ev klasöründeki .wezterm.lua; oradaki kısayolları değiştirirken Ctrl+b’yi herdr’a bırak.</li><li>Kopyalamak için Ctrl+Shift+C, yapıştırmak için Ctrl+Shift+V kullan; terminal kapanınca ajanlar durmaz, tekrar bağlanırsın.</li></ul>
+<p><strong>Nerede:</strong> Windows&#39;ta çalışır ve WSL Ubuntu&#39;yu açar; herdr&#39;a bağlanmak için kullandığın pencere burasıdır.</p>
+<p class="inot"><strong>Ne değildir:</strong> Ajanların yaşadığı yer değildir; sadece herdr&#39;a bakan bir penceredir, başka bir terminal de kullanabilirsin.</p>
+</div></div></details>
+</section>
+<p>Windows PC&#39;de, WSL içinde bir Claude Code &quot;lider&quot; oturumu; ucuz DeepSeek modeliyle çalışan, sandbox&#39;a kapatılmış OpenCode ve Command Code &quot;işçileri&quot;; her işi ayrı bir git worktree&#39;de yürüten <code>lane</code> aracı; her şeyi terminal sekmesi olarak gösteren herdr; telefondan izlemek için Heeler. Bu rehber, bizim evde her gün kullandığımız düzenin adım adım, sıfırdan kurulumudur.</p><p>Komutlar Ubuntu 24.04 (WSL2) ve Windows 11 içindir. <code>&lt;KÖŞELİ_PARANTEZ&gt;</code> içindeki yerleri kendi değerlerinle değiştir. Dosya yolları önerimizdir; değiştirirsen her yerde aynı değiştir.</p>
+<div class="files" aria-label="Dosyalar"><a href="./KURULUM.md" download="KURULUM.md">KURULUM.md indir</a><a href="./CLAUDE.md" download="CLAUDE.md">CLAUDE.md indir</a><a href="./extract.py" download="extract.py">extract.py indir</a></div>
+<nav class="toc" aria-label="İçindekiler"><ul><li><a href="#nerede">Neyi nerede kullanırsın</a></li><li><a href="#parcalar">Parçalar: hangisi ne yapar?</a></li><li><a href="#b2">0. Büyük resim</a></li><li><a href="#b3">1. WSL2 + Ubuntu 24.04 + systemd</a></li><li><a href="#b4">2. Temel paketler, Node.js, PATH</a></li><li><a href="#b5">3. WezTerm (Windows terminali)</a></li><li><a href="#b6">4. Tailscale (özel ağ)</a></li><li><a href="#b7">5. herdr</a></li><li><a href="#b8">6. Claude Code + CLAUDE.md düzeni</a></li><li><a href="#b9">7. OpenCode işçisi (<code>oc-worker</code>)</a></li><li><a href="#b10">8. Command Code işçisi (<code>cc-worker</code>)</a></li><li><a href="#b11">9. agent-lanes (<code>lane</code>)</a></li><li><a href="#b12">10. Telefon: Windows sshd + WSL sshd + Heeler</a></li><li><a href="#b13">11. (İsteğe bağlı) ikinci makine</a></li><li><a href="#b14">12. Yeniden başlatma sonrası rutin</a></li><li><a href="#b15">13. Güncelleme rutini</a></li><li><a href="#b16">14. Güvenlik kuralları (kısa liste)</a></li><li><a href="#b17">15. Sorun giderme</a></li><li><a href="#b18">16. Kopya kağıdı</a></li><li><a href="#b19">17. Claude talimat dosyaları</a></li></ul></nav>
+<section id="b2"><h2>0. Büyük resim</h2><div class="tw"><table><thead><tr><th scope="col">Parça</th><th scope="col">Ne yapar</th><th scope="col">Güven seviyesi</th></tr></thead><tbody><tr><td>Claude Code (lider)</td><td>Planlar, işi böler, brief yazar, her diff&#39;i okur, testleri kendisi koşar, mutant ekler, commit ve merge yapar</td><td>Yüksek; ama dışarıya dönük her adım için yine senin onayın</td></tr><tr><td>OpenCode (<code>oc-worker</code>)</td><td>Varsayılan işçi. DeepSeek V4.1 Flash ile kod ve test yazar</td><td>Düşük: sandbox içinde, her sonucu yeniden test edilir</td></tr><tr><td>Command Code (<code>cc-worker</code>)</td><td>Yedek işçi, aynı sandbox tasarımı, aynı model</td><td>Düşük: aynı kurallar</td></tr><tr><td><code>lane</code> (agent-lanes)</td><td>Worktree açar, işçiyi başlatır, bekler, defter tutar, testleri ve mutantları koşar, merge eder</td><td>İşçi kodunu sandbox dışında çalıştırır, bu yüzden önce diff okunur</td></tr><tr><td>herdr</td><td>Her makinede terminal çalışma alanı sunucusu: konu başına workspace, her işçiye bir sekme</td><td>Soketi her pane&#39;e yazabilir, bu yüzden asla sandbox&#39;a girmez</td></tr><tr><td>Heeler</td><td>iPhone / iPad / Mac istemcisi: herdr&#39;a SSH ile bağlanır, iş bitince push gönderir</td><td>Cihaz başına ayrı SSH anahtarı, şifre girişi kapalı</td></tr><tr><td>Tailscale</td><td>Bütün makineler ve telefon arasında özel ağ</td><td>İnternete açık tek port yok</td></tr><tr><td>WezTerm</td><td>Windows&#39;ta terminal; WSL&#39;i ve herdr&#39;ı açar</td><td>-</td></tr></tbody></table></div><p>Akış kısaca: sen Claude&#39;a bir iş söylersin → Claude işi dosya bazında 2-5 parçaya böler → her parça için <code>lane new</code> + brief → işçiler paralel çalışır, herdr&#39;da sekme olarak görünür → biten işçi <code>.lane/REPORT.md</code> ve <code>.lane/LANE_RESULT.json</code> yazar → Claude diff&#39;i okur, kendi testlerini ve mutantlarını koşar (<code>lane accept</code>) → geçen iş <code>lane merge</code> ile ana dala girer. Sen bunu telefondan Heeler ile izlersin.</p><p>Kurulum sırası (bu sırayla git, her adım bir öncekine dayanıyor):</p><ol><li>WSL2 + Ubuntu 24.04 + systemd</li><li>Temel paketler, Node.js, PATH</li><li>WezTerm</li><li>Tailscale</li><li>herdr (+ kendi kendine başlayan servis)</li><li>Claude Code + CLAUDE.md düzeni</li><li>OpenCode işçisi (<code>oc-worker</code>)</li><li>Command Code işçisi (<code>cc-worker</code>)</li><li>agent-lanes (<code>lane</code>)</li><li>Telefon: Windows sshd + WSL sshd + Heeler</li><li>(İsteğe bağlı) ikinci makine</li><li>Yeniden başlatma sonrası rutin</li><li>Güncelleme rutini</li><li>Güvenlik kuralları</li><li>Sorun giderme</li><li>Kopya kağıdı</li><li>Claude talimat dosyaları (CLAUDE.md şablonları)</li></ol></section>
+<section id="b3"><h2>1. WSL2 + Ubuntu 24.04 + systemd</h2><p>Windows&#39;ta <strong>yönetici</strong> PowerShell aç:</p><figure class="code"><pre><code>wsl --install -d Ubuntu-24.04</code></pre></figure><p>Bilgisayarı yeniden başlat. Açılışta Ubuntu penceresi kullanıcı adı ve şifre ister: kısa, küçük harfli bir ad seç (bu rehberde WSL kullanıcın <code>$USER</code>). Şifreyi unutma, <code>sudo</code> için lazım.</p><p>Sürümü kontrol et (WSL 2.x olmalı, dağıtım VERSION 2):</p><figure class="code"><pre><code>wsl --version
+wsl -l -v</code></pre></figure><p><strong>Ağ: mirrored mod.</strong> Windows&#39;ta <code>%USERPROFILE%\.wslconfig</code> dosyasını oluştur (yoksa). Bu mod sayesinde Windows&#39;un <code>127.0.0.1</code>&#39;i WSL&#39;e de gider; telefondan gelen SSH, Windows&#39;tan WSL&#39;e doğrudan atlayabilir.</p><figure class="code"><pre><code>[wsl2]
+networkingMode=mirrored
+# İsteğe bağlı: WSL&#39;e verilecek RAM üst sınırı
+# memory=24GB</code></pre></figure><p><strong>systemd.</strong> Ubuntu içinde <code>/etc/wsl.conf</code>:</p><figure class="code"><pre><code>sudo tee /etc/wsl.conf &gt;/dev/null &lt;&lt;EOF
+[boot]
+systemd=true
+
+[user]
+default=$USER
+EOF</code></pre></figure><p>Sonra Windows&#39;ta <code>wsl --shutdown</code>, Ubuntu&#39;yu tekrar aç ve kontrol et:</p><figure class="code"><pre><code>systemctl --user status        # &quot;State: running&quot; görmelisin
+ps -p 1 -o comm=               # systemd yazmalı</code></pre></figure><p><strong>Dosyalar nerede dursun:</strong> projeleri WSL&#39;in kendi diskinde tut (<code>~/...</code>), <code>/mnt/c/...</code> altında değil. <code>/mnt/c</code> üzerinden git ve npm çok yavaş, dosya izinleri de bozuk görünür. Bu rehberdeki düzen:</p><figure class="code"><pre><code>~/ai/projects/&lt;konu&gt;/          # her konu (proje) ayrı klasör, her birinin kendi CLAUDE.md&#39;si
+~/agent-lanes/repo             # lane&#39;lerin dallandığı ana repo (ya da LANE_MAIN_REPO ile başka bir repo)
+~/agent-lanes/worktrees/       # işçi worktree&#39;leri: oc-worker-01, cc-worker-03 ...
+~/agent-lanes/lanes/           # lane defteri, loglar, ACCEPT_REPORT.md (işçiler buraya ulaşamaz)
+~/.local/bin, ~/.local/lib     # kullanıcı seviyesinde programlar (sudo gerektirmez)</code></pre></figure><figure class="code"><pre><code>mkdir -p ~/ai/projects ~/agent-lanes/worktrees ~/agent-lanes/lanes ~/.local/bin ~/.local/lib</code></pre></figure></section>
+<section id="b4"><h2>2. Temel paketler, Node.js, PATH</h2><figure class="code"><pre><code>sudo apt update &amp;&amp; sudo apt upgrade -y
+sudo apt install -y build-essential git curl wget unzip xz-utils jq ripgrep rsync \
+  python3 python3-venv python3-pip bubblewrap openssh-client
+bwrap --version                # bubblewrap 0.9 veya üstü</code></pre></figure><p><code>bubblewrap</code> (bwrap) işçi sandbox&#39;ının temeli: işçinin göreceği dosya sistemini sıfırdan, sadece izin verdiğimiz klasörlerle kurar.</p><p><strong>Node.js (kullanıcı seviyesinde, sudo&#39;suz).</strong> OpenCode, Command Code ve Heeler eklentisi Node 22+ ister. Node&#39;u <code>~/.local/lib/nodejs</code> altına koyuyoruz; böylece işçi sandbox&#39;ı onu salt okunur görebilir (nvm <code>~/.nvm</code> altına kurar, sandbox onu görmez).</p><figure class="code"><pre><code>cd /tmp
+B=https://nodejs.org/dist/latest-v26.x
+curl -fsSLO $B/SHASUMS256.txt
+F=$(grep -o &#39;node-v[0-9.]*-linux-x64\.tar\.xz&#39; SHASUMS256.txt | head -1)
+curl -fsSLO $B/$F &amp;&amp; grep &quot; $F\$&quot; SHASUMS256.txt | sha256sum -c -     # &quot;OK&quot; yazmalı
+mkdir -p ~/.local/lib/nodejs &amp;&amp; tar -xJf $F -C ~/.local/lib/nodejs
+ln -sfn ${F%.tar.xz} ~/.local/lib/nodejs/current        # göreli bağ: sandbox içinde de çözülür</code></pre></figure><p><strong>PATH.</strong> <code>~/.bashrc</code> dosyasının <strong>en üstüne</strong> (Ubuntu&#39;nun &quot;If not running interactively, don&#39;t do anything&quot; satırından <strong>önce</strong>) ekle. Önce olması önemli: SSH ile etkileşimsiz komut çalıştırıldığında (<code>ssh pc &#39;lane ls&#39;</code>, herdr uzak makine) <code>.bashrc</code> o satırda durur ve PATH&#39;in altındaki kısmı hiç okunmaz.</p><figure class="code"><pre><code># --- ~/.bashrc en üstü ---
+export PATH=&quot;$HOME/.local/bin:$HOME/.local/lib/nodejs/current/bin:$PATH&quot;</code></pre></figure><figure class="code"><pre><code>source ~/.bashrc
+npm config set prefix ~/.local        # npm i -g artık ~/.local altına kurar, sudo gerekmez
+node --version &amp;&amp; npm --version &amp;&amp; command -v node</code></pre></figure><p><strong>Git kimliği</strong> (commit&#39;leri Claude atacak, ama senin adınla):</p><figure class="code"><pre><code>git config --global user.name &quot;&lt;ADIN&gt;&quot;
+git config --global user.email &quot;&lt;EPOSTAN&gt;&quot;
+git config --global init.defaultBranch main</code></pre></figure></section>
+<section id="b5"><h2>3. WezTerm (Windows terminali)</h2><p>Windows PowerShell:</p><figure class="code"><pre><code>winget install wez.wezterm</code></pre></figure><p><code>%USERPROFILE%\.wezterm.lua</code> (en küçük çalışan hali; Alt+L ile menüden WSL açılır):</p><figure class="code"><pre><code>local wezterm = require(&quot;wezterm&quot;)
+local act = wezterm.action
+local config = wezterm.config_builder()
+
+-- Varsayılan: doğrudan WSL Ubuntu, ev klasöründe
+config.default_prog = { &quot;wsl.exe&quot;, &quot;-d&quot;, &quot;Ubuntu-24.04&quot;, &quot;--cd&quot;, &quot;~&quot; }
+
+config.launch_menu = {
+  { label = &quot;WSL Ubuntu-24.04&quot;, args = { &quot;wsl.exe&quot;, &quot;-d&quot;, &quot;Ubuntu-24.04&quot;, &quot;--cd&quot;, &quot;~&quot; } },
+  { label = &quot;WSL + herdr&quot;, args = { &quot;wsl.exe&quot;, &quot;-d&quot;, &quot;Ubuntu-24.04&quot;, &quot;--cd&quot;, &quot;~&quot;, &quot;--&quot;, &quot;bash&quot;, &quot;-lc&quot;, &quot;herdr&quot; } },
+  { label = &quot;PowerShell&quot;, args = { &quot;powershell.exe&quot; } },
+}
+
+config.keys = {
+  { key = &quot;l&quot;, mods = &quot;ALT&quot;, action = act.ShowLauncher },
+  { key = &quot;c&quot;, mods = &quot;CTRL|SHIFT&quot;, action = act.CopyTo(&quot;Clipboard&quot;) },
+  { key = &quot;v&quot;, mods = &quot;CTRL|SHIFT&quot;, action = act.PasteFrom(&quot;Clipboard&quot;) },
+  { key = &quot;k&quot;, mods = &quot;CTRL|SHIFT&quot;, action = act.ClearScrollback(&quot;ScrollbackAndViewport&quot;) },
+}
+
+config.scrollback_lines = 20000
+config.max_fps = 120
+return config</code></pre></figure><p>Not: herdr&#39;ın kendi kısayol öneki <code>Ctrl+b</code>. WezTerm&#39;de <code>Ctrl+b</code>&#39;yi başka bir şeye bağlama.</p></section>
+<section id="b6"><h2>4. Tailscale (özel ağ)</h2><ol><li>Windows: <code>winget install tailscale.tailscale</code>, sonra Tailscale&#39;e giriş yap.</li><li>Telefon / iPad: App Store&#39;dan Tailscale, aynı hesapla giriş.</li><li>Tailscale yönetim panelinde makine adlarını kısa ve anlamlı yap (ör. <code>pc</code>, <code>laptop</code>), MagicDNS açık kalsın. Bu rehberde PC&#39;nin tailnet adı <code>&lt;PC_TAILNET_ADI&gt;</code>.</li><li>WSL mirrored modda olduğu için tailnet WSL içinden de görünür: <code>ping &lt;PC_TAILNET_ADI&gt;</code> WSL içinden de çalışmalı.</li></ol><p>İnternete hiçbir port açmıyoruz. SSH sadece tailnet üzerinden (adım 10).</p><p>İsteğe bağlı: Tailscale ACL&#39;lerinde sadece kendi cihazlarının birbirine SSH (22) açabildiğinden emin ol. Heeler&#39;ın kendi uygulama içi Tailscale&#39;ini açarsan o ayrı bir cihaz olarak eklenir; ACL&#39;de ona da izin gerekir. Telefonda zaten Tailscale uygulaması varsa Heeler&#39;ınkini kapalı bırakmak daha basit.</p></section>
+<section id="b7"><h2>5. herdr</h2><p>herdr: her makinede çalışan terminal çalışma alanı sunucusu. Workspace (konu) → sekme → pane. Terminal kapansa da içindekiler çalışmaya devam eder; WezTerm, Heeler veya başka bir makine aynı oturuma bağlanır.</p><figure class="code"><pre><code>curl -fsSL https://herdr.dev/install.sh | sh
+command -v herdr &amp;&amp; herdr --version
+herdr                    # ilk açılış: varsayılan oturumu başlatır ve bağlanır</code></pre></figure><p>Temel tuşlar (önek <code>Ctrl+b</code>: bas, bırak, sonra tuş):</p><div class="tw"><table><thead><tr><th scope="col">Tuş</th><th scope="col">İş</th></tr></thead><tbody><tr><td><code>Ctrl+b</code> <code>?</code></td><td>Tüm kısayollar</td></tr><tr><td><code>Ctrl+b</code> <code>c</code></td><td>Yeni sekme</td></tr><tr><td><code>Ctrl+b</code> <code>v</code></td><td>Sağa böl</td></tr><tr><td><code>Ctrl+b</code> <code>-</code></td><td>Aşağı böl</td></tr><tr><td><code>Ctrl+b</code> <code>q</code></td><td>Ayrıl (detach): pane&#39;ler sunucuda çalışmaya devam eder; <code>herdr</code> ile geri dön</td></tr></tbody></table></div><p>Fare her şey için çalışır. Ayarlar: <code>~/.config/herdr/config.toml</code> (varsayılanları görmek için <code>herdr --default-config</code>, değişikliği uygulamak için <code>herdr server reload-config</code>).</p><p><strong>Ajan entegrasyonları.</strong> herdr, Claude Code ve OpenCode&#39;un &quot;çalışıyor / bekliyor / bitti&quot; durumunu sekmede gösterebilir:</p><figure class="code"><pre><code>herdr integration install claude      # ~/.claude/hooks altına küçük bir hook koyar
+herdr integration install opencode    # ~/.config/opencode/plugins altına
+herdr integration status</code></pre></figure><p>Bunlar senin <strong>etkileşimli</strong> Claude / OpenCode oturumların için. İşçi sandbox&#39;ı bu yapılandırmayı zaten görmez (sandbox&#39;ta <code>XDG_CONFIG_HOME</code> boş bir geçici klasör); herdr soketi asla sandbox&#39;a girmez (adım 14).</p><p><strong>Konu başına workspace.</strong> Her proje için bir workspace aç ve adını ver (sol kenar çubuğundan ya da <code>herdr workspace --help</code>). Biz: ana proje, <code>lanes</code> (işçi sekmeleri), sistem işleri, yan projeler. Her workspace&#39;in ilk sekmesinde ilgili klasöre <code>cd</code> edip <code>claude</code> başlatırız.</p><p><strong>herdr&#39;ı otomatik başlatan systemd servisi.</strong> WSL açılınca herdr sunucusu kendiliğinden kalksın. Sorun: systemd servisleri Windows PATH&#39;ini almaz, o zaman herdr pane&#39;lerinde <code>powershell.exe</code>, <code>cmd.exe</code>, <code>explorer.exe</code> çalışmaz. Bu küçük betik Windows PATH&#39;ini sorup ekliyor:</p><figure class="code"><figcaption>Dosya: <code>~/.local/bin/herdr-server-start</code></figcaption><pre><code>#!/bin/bash -l
+# herdr-server systemd kullanıcı servisi bunu çalıştırır.
+# systemd servisleri, wsl.exe&#39;nin normal kabuklara eklediği Windows PATH&#39;ini almaz; o zaman pane&#39;lerde
+# cmd.exe / powershell.exe olmaz. Windows&#39;a PATH&#39;ini sor, WSL yollarına çevir, ekle, sonra herdr&#39;ı başlat.
+win_path=&quot;&quot;
+if raw=$(cd /mnt/c 2&gt;/dev/null &amp;&amp; timeout 20 /mnt/c/WINDOWS/system32/cmd.exe /c &#39;echo %PATH%&#39; 2&gt;/dev/null | tr -d &#39;\r&#39;); then
+  IFS=&#39;;&#39; read -ra parts &lt;&lt;&lt; &quot;$raw&quot;
+  for p in &quot;${parts[@]}&quot;; do
+    [ -n &quot;$p&quot; ] || continue
+    u=$(wslpath -u &quot;$p&quot; 2&gt;/dev/null) || continue
+    u=${u%/}
+    [ -d &quot;$u&quot; ] &amp;&amp; win_path=&quot;$win_path:$u&quot;
+  done
+fi
+# yedek: standart Windows klasörleri
+[ -n &quot;$win_path&quot; ] || win_path=&quot;:/mnt/c/WINDOWS/system32:/mnt/c/WINDOWS:/mnt/c/WINDOWS/System32/Wbem:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0:/mnt/c/WINDOWS/System32/OpenSSH&quot;
+export PATH=&quot;$PATH$win_path&quot;
+exec herdr server</code></pre></figure><figure class="code"><figcaption>Dosya: <code>~/.config/systemd/user/herdr-server.service</code></figcaption><pre><code>[Unit]
+Description=herdr server (kalıcı herdr oturumu; WezTerm, Heeler ve uzak istemciler buna bağlanır)
+
+[Service]
+Type=simple
+# pane&#39;lerde Windows birlikte çalışması (powershell.exe vb.); 1_interop oturumlardan uzun yaşayan init soketi
+Environment=WSL_INTEROP=/run/WSL/1_interop
+Environment=SHELL=/bin/bash
+# elle başlatılmış bir sunucu (terminalde `herdr`) varsa: hata verip döngüye girme, atla
+ExecCondition=/bin/bash -lc &#39;! herdr status 2&gt;/dev/null | grep -q &quot;status: running&quot;&#39;
+# login kabuğu + Windows PATH: pane&#39;ler node, oc-worker, lane, cmd.exe, powershell.exe görür
+ExecStart=/bin/bash -l %h/.local/bin/herdr-server-start
+# çökerse yeniden başlar; bilerek `herdr server stop` derseniz 0 ile çıkar ve kapalı kalır
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target</code></pre></figure><figure class="code"><pre><code>chmod +x ~/.local/bin/herdr-server-start
+herdr server stop                       # elle açtığın sunucuyu kapat (içindeki pane&#39;ler de kapanır)
+systemctl --user daemon-reload
+systemctl --user enable --now herdr-server
+systemctl --user status herdr-server    # active (running)
+herdr                                   # artık servise bağlanır</code></pre></figure><p>Bir herdr pane&#39;inde <code>powershell.exe -c &#39;echo ok&#39;</code> çalışıyorsa PATH işi tamam.</p><p><strong>Linger.</strong> Varsayılan olarak kullanıcı servisleri sen WSL&#39;e bir kez giriş yapınca başlar (WezTerm&#39;de WSL açınca). WSL&#39;in kendisi başka bir şey yüzünden açıldığında da kalksınlar istersen:</p><figure class="code"><pre><code>sudo loginctl enable-linger $USER</code></pre></figure><p>Linger açık olsa bile WSL&#39;in kendisi bir şey tarafından başlatılmalı; Windows açılışında WSL otomatik açılmaz. En kolayı: açılışta WezTerm&#39;i başlat (Windows Başlangıç klasörüne kısayol) ya da Görev Zamanlayıcı&#39;da oturum açılışında <code>wsl.exe -d Ubuntu-24.04 --exec /bin/true</code>.</p></section>
+<section id="b8"><h2>6. Claude Code + CLAUDE.md düzeni</h2><figure class="code"><pre><code>curl -fsSL https://claude.ai/install.sh | bash
+claude --version
+cd ~/ai/projects &amp;&amp; claude          # ilk açılışta tarayıcıdan hesabınla giriş</code></pre></figure><p>Claude Code&#39;da bu düzen için en önemli üç şey: <strong>talimat dosyaları</strong>, <strong>hafıza</strong> ve <strong>izinler</strong>.</p><p><strong>Talimat dosyaları (CLAUDE.md).</strong> Claude her oturum başında bunları okur:</p><div class="tw"><table><thead><tr><th scope="col">Dosya</th><th scope="col">Kapsam</th><th scope="col">İçine ne yazılır</th></tr></thead><tbody><tr><td><code>~/.claude/CLAUDE.md</code></td><td>Her oturum, her klasör</td><td>Kim olduğun, genel çalışma kuralların, lane düzeni, asla yapılmayacaklar</td></tr><tr><td><code>~/.claude/rules/*.md</code></td><td>Her oturum</td><td>Makine bilgileri (<code>hosts.md</code>): Tailscale adları, ssh takma adları, hangi anahtar nerede</td></tr><tr><td><code>~/ai/projects/&lt;konu&gt;/CLAUDE.md</code></td><td>O klasörde başlatılan oturumlar</td><td>Projenin amacı, test komutu, dokunulmayacak yerler</td></tr><tr><td><code>~/ai/projects/&lt;konu&gt;/AGENTS.md</code></td><td>Diğer ajanlar (OpenCode vb.)</td><td><code>CLAUDE.md</code>&#39;ye symlink: <code>ln -s CLAUDE.md AGENTS.md</code></td></tr></tbody></table></div><p>Hazır şablonlar en sonda (bölüm 17) ve pakette ayrı dosya olarak (<code>CLAUDE.md</code>).</p><p>Öğrendiğimiz iki tuzak:</p><ul><li><code>@dosya</code> ile import, <strong>proje klasörünün dışına</strong> çıkan bir yolu (symlink olsa bile) sessizce yüklemiyor. Her oturumda olması gereken ortak bilgi için <code>~/.claude/rules/</code> klasörünü kullan: oradaki her <code>.md</code> her oturumda yükleniyor. Diğer ajanlar okusun istersen ortak bir yere bunun symlink&#39;ini koy.</li><li>Claude Code hafızası <strong>çalışma klasörüne göre</strong> tutuluyor (<code>~/.claude/projects/&lt;klasör-adı&gt;/memory/</code>). Başka bir klasörde açılan oturum o hafızayı görmez. Bu yüzden her konu kendi klasöründe, kendi herdr workspace&#39;inde, kendi Claude oturumunda.</li></ul><p><strong>Hafıza.</strong> Claude kalıcı bilgileri <code>~/.claude/projects/&lt;klasör&gt;/memory/</code> altına tek-bilgi-tek-dosya yazar; <code>MEMORY.md</code> dizindir. &quot;Bunu hatırla&quot; dediğinde oraya yazar. Lane durumunu hafızaya yazdırma; lane defteri zaten tutuyor.</p><p><strong>İzinler ve auto mode.</strong> Başlangıçta Claude her komutta onay ister. Güven oluştukça <code>/permissions</code> ile sık kullanılan, zararsız komutlara izin ver. Auto mode (Shift+Tab ile mod değişir) komutları bir sınıflandırıcıyla kendisi onaylar; bunu güvenli kullanmak için <code>~/.claude/settings.json</code> içinde ortamını ve kesin yasakları tarif et:</p><figure class="code"><pre><code>{
+  &quot;model&quot;: &quot;opus&quot;,
+  &quot;autoMode&quot;: {
+    &quot;environment&quot;: [
+      &quot;**Kurulum**: tek kişinin makineleri, özel bir Tailscale ağında: PC (bu WSL), &lt;DİĞER_MAKİNELER&gt;. herdr hepsinde çalışıyor; Heeler (iOS/Mac) ssh ile bağlanıyor&quot;,
+      &quot;**Konular** ~/ai/projects/&lt;konu&gt; altında; her konunun CLAUDE.md&#39;si o konu için geçerli. Ortak makine bilgileri ~/.claude/rules/hosts.md&quot;,
+      &quot;**İşçiler**: oc-worker / cc-worker sadece `lane` üzerinden, sandbox içinde; worktree&#39;ler ~/agent-lanes/worktrees&quot;,
+      &quot;**Asla**: herdr soketini işçi sandbox&#39;ına koymak; anahtar, token, host key yayınlamak; git push&#39;u sormadan yapmak&quot;
+    ],
+    &quot;soft_deny&quot;: [
+      &quot;$defaults&quot;,
+      &quot;Bash(git push:*) — sahibine sormadan uzak repoya gönderme yok&quot;
+    ]
+  }
+}</code></pre></figure><p><code>$defaults</code> satırı yerleşik güvenlik kurallarını korur; sil­me. JSON geçerli olmalı: düzenledikten sonra <code>python3 -m json.tool ~/.claude/settings.json &gt;/dev/null &amp;&amp; echo ok</code>.</p><p><strong>Skill: lane.</strong> Lane iş akışını her seferinde anlatmamak için Claude&#39;a bir skill ver: <code>~/.claude/skills/lane/SKILL.md</code> (bölüm 17&#39;de hazır metin). Claude &quot;işçilere ver&quot;, &quot;lane&quot;, &quot;opencode ile yap&quot; dendiğinde bunu kendisi yükler; sen de <code>/lane</code> yazarak çağırabilirsin.</p><p><strong>Günlük kullanım ipuçları.</strong></p><ul><li>Uzun işlerde Claude&#39;a &quot;bitince bana haber ver&quot; deme; işçiyi arka planda başlatır, bitince sistem onu uyandırır.</li><li>Büyük bir değişiklikten önce <code>Shift+Tab</code> ile plan moduna al: önce plan, onayından sonra kod.</li><li><code>claude -c</code> son konuşmaya, <code>claude -r</code> geçmiş bir oturuma döner. Bağlam dolunca Claude kendisi özetler; kritik kararları hafızaya ya da proje dosyasına yazdır.</li><li>Claude&#39;a bir işi yaptırınca &quot;test çıktısını göster&quot; de; &quot;testler geçti&quot; cümlesine değil çıktıya bak.</li></ul></section>
+<section id="b9"><h2>7. OpenCode işçisi (<code>oc-worker</code>)</h2><p><strong>Hesap.</strong> opencode.ai üzerinde <strong>OpenCode Go</strong> aboneliği aldık. Model: <code>opencode-go/deepseek-v4.1-flash</code> (ucuz, yeterince iyi; çünkü her sonucu yeniden test ediyoruz). Konsolda bölgeyi <strong>Global</strong> yapmak gerekti, yoksa DeepSeek modelleri gelmedi. Ücretsiz (<code>-free</code>) modelleri repo verisiyle kullanma: eğitim verisi olarak kullanılabiliyorlar. Kullandıkça öde (<code>opencode/...</code>) sağlayıcısı Go aboneliğiyle &quot;Insufficient balance&quot; verir; doğru önek <code>opencode-go/</code>.</p><p><strong>Kurulum:</strong></p><figure class="code"><pre><code>npm i -g opencode-ai
+ls ~/.local/lib/node_modules/opencode-ai/bin/      # opencode.exe (adı .exe ama Linux ikilisi)
+opencode --version</code></pre></figure><p><strong>Anahtar dosyası</strong> (repo dışında, sadece sen okuyabilirsin):</p><figure class="code"><pre><code>mkdir -p ~/.config/opencode-worker &amp;&amp; chmod 700 ~/.config/opencode-worker
+nano ~/.config/opencode-worker/api-key      # anahtarı tek satır yapıştır, kaydet
+chmod 600 ~/.config/opencode-worker/api-key</code></pre></figure><p><strong>Tehdit modeli.</strong> İşçi üçüncü taraf bir modele repo içeriği gönderiyor; makinede de anahtarlar, SSH anahtarları, Claude girişi var. O yüzden:</p><ul><li>Sandbox&#39;ta sadece işletim sistemi (<code>/usr</code>, <code>/etc</code>), program dosyaları (<code>~/.local/lib</code>, salt okunur) ve <strong>sadece o işin repo klasörü</strong> var. <code>~/.ssh</code>, <code>~/.claude</code>, <code>~/.config</code>, diğer projeler, <code>/mnt/c</code> hiç yok.</li><li><code>--write</code> sadece işçinin kendi worktree&#39;sinde (<code>oc-worker-NN</code>). <code>.git</code> salt okunur ve asıl repo görünmez: işçi git kullanamaz, commit atamaz.</li><li>API anahtarı ortam değişkeni ya da argüman olarak değil, <strong>dosya tanımlayıcısı 3</strong> ile girer, bir kez okunur, kapatılır. Bir eklenti, ajanın açtığı her kabukta anahtarı boşaltır. Her ajan kabuğu ayrıca iç içe bir kullanıcı+pid namespace&#39;inde çalışır: OpenCode sürecini göremez, belleğini/ortamını okuyamaz.</li><li>Her çalıştırma kendi veri klasörünü alır (paralel çalıştırmalar tek SQLite&#39;ı paylaşınca &quot;database is locked&quot; hatası veriyor).</li><li>Kapsanmayan: ağ açık (model API&#39;si için şart). İşçi repo içeriğini dışarı gönderebilir; bu yüzden repoya sadece bir üçüncü tarafa göstereceğin şeyi koy, gizli bilgiyi repo dışında tut.</li></ul><p><strong>Dosyalar.</strong> Paketteki <code>scripts/</code> klasöründe hazır hepsi var (bölüm 16&#39;da tek komutla kurulum). Tek tek:</p><figure class="code"><figcaption>Dosya: <code>~/.local/bin/oc-worker</code></figcaption><pre><code>#!/usr/bin/env bash
+# oc-worker: OpenCode (OpenCode Go, DeepSeek) işçisi. Mevcut repoda tek bir görev, allowlist sandbox içinde.
+#   oc-worker [-m MODEL] &quot;soru&quot;             salt okunur: düzenleme yok, kabuk yok
+#   oc-worker --write [-m MODEL] &quot;görev&quot;    düzenler ve komut çalıştırır; sadece kendi worktree&#39;sinde (oc-worker-NN)
+# Kimlik bilgileri, diğer klasörler ve Windows sürücüleri sandbox&#39;ta yok. Anahtar 3 numaralı tanımlayıcıyla girer
+# (bkz. ~/.local/lib/oc-worker/key-env.sh) ve bir eklenti ajanın açtığı her kabukta onu boşaltır.
+set -euo pipefail
+KEY=&quot;$HOME/.config/opencode-worker/api-key&quot;; L=&quot;$HOME/.local/lib/oc-worker&quot;
+WT=$(readlink -m &quot;${LANE_WORKTREES:-$HOME/agent-lanes/worktrees}&quot;)
+PROJ=$(readlink -m &quot;${AI_PROJECTS:-$HOME/ai/projects}&quot;)
+OC_BIN=&quot;$HOME/.local/lib/node_modules/opencode-ai/bin/opencode.exe&quot;
+MODEL=opencode-go/deepseek-v4.1-flash; MODE=ro
+if [ &quot;${1:-}&quot; = &quot;--write&quot; ]; then MODE=rw; shift; fi
+if [ &quot;${1:-}&quot; = &quot;-m&quot; ]; then [ $# -ge 2 ] || { echo &quot;oc-worker: -m bir model ister&quot; &gt;&amp;2; exit 2; }; MODEL=$2; shift 2; fi
+[ $# -eq 1 ] &amp;&amp; [ -n &quot;$1&quot; ] &amp;&amp; [ &quot;${1#-}&quot; = &quot;$1&quot; ] || { echo &#39;kullanım: oc-worker [--write] [-m MODEL] &quot;görev&quot;&#39; &gt;&amp;2; exit 2; }
+HERE=$(pwd -P); ROOT=$(git -C &quot;$HERE&quot; rev-parse --show-toplevel 2&gt;/dev/null || echo &quot;$HERE&quot;)
+case &quot;$ROOT/&quot; in
+  &quot;$WT&quot;/?*|&quot;$PROJ&quot;/?*|/tmp/?*) ;;
+  *) echo &quot;oc-worker: reddedildi, izinli bir klasör değil: $ROOT&quot; &gt;&amp;2; exit 3;;
+esac
+if [ &quot;$MODE&quot; = rw ] &amp;&amp; ! [[ &quot;$ROOT&quot; =~ ^&quot;$WT&quot;/oc-worker(-[0-9]{1,3})?$ ]]; then
+  echo &quot;oc-worker: --write sadece $WT/oc-worker veya oc-worker-NN içinde çalışır&quot; &gt;&amp;2; exit 3
+fi
+[ -f &quot;$KEY&quot; ] &amp;&amp; [ &quot;$(stat -c %a &quot;$KEY&quot;)&quot; = 600 ] || { echo &quot;oc-worker: anahtar dosyası yok ya da izni 600 değil: $KEY&quot; &gt;&amp;2; exit 4; }
+[ -x &quot;$OC_BIN&quot; ] || { echo &quot;oc-worker: opencode bulunamadı: $OC_BIN (npm i -g opencode-ai)&quot; &gt;&amp;2; exit 5; }
+ARGS=(run -m &quot;$MODEL&quot; --dir &quot;$HERE&quot;)
+if [ &quot;$MODE&quot; = rw ]; then ARGS+=(--auto); fi
+exec 3&lt;&quot;$KEY&quot; &lt;/dev/null   # görev argümanla gelir; açık kalmış bir stdin&#39;i beklemesin (opencode run onu okur)
+exec &quot;$L/sandbox.sh&quot; &quot;$MODE&quot; &quot;$ROOT&quot; &quot;$HERE&quot; &quot;$L/key-env.sh&quot; &quot;$OC_BIN&quot; &quot;${ARGS[@]}&quot; &quot;$1&quot;</code></pre></figure><figure class="code"><figcaption>Dosya: <code>~/.local/lib/oc-worker/sandbox.sh</code></figcaption><pre><code>#!/usr/bin/env bash
+# OpenCode için allowlist sandbox: sandbox.sh ro|rw ROOT WORKDIR komut...
+# İçeride sadece işletim sistemi, program dosyaları (salt okunur), işçi durumu ve ROOT var.
+# rw: ROOT yazılabilir ama .git salt okunur. Proje içindeki opencode yapılandırması yok sayılır.
+set -euo pipefail
+MODE=$1; ROOT=$2; WORK=$3; shift 3
+H=$HOME; S=$H/.local/state/oc-worker
+RUN=$(date -u +%Y%m%dT%H%M%S)-$$; mkdir -p &quot;$S/runs/$RUN&quot; &quot;$S/cache&quot;   # her çalıştırmaya ayrı sqlite
+if [ &quot;$MODE&quot; = rw ]; then
+  REPO=(--bind &quot;$ROOT&quot; &quot;$ROOT&quot;)
+  if [ -e &quot;$ROOT/.git&quot; ]; then REPO+=(--ro-bind &quot;$ROOT/.git&quot; &quot;$ROOT/.git&quot;); fi
+  PERM=&#39;{&quot;edit&quot;:&quot;allow&quot;,&quot;bash&quot;:&quot;allow&quot;,&quot;webfetch&quot;:&quot;deny&quot;,&quot;websearch&quot;:&quot;deny&quot;,&quot;external_directory&quot;:&quot;allow&quot;}&#39;
+else
+  REPO=(--ro-bind &quot;$ROOT&quot; &quot;$ROOT&quot;)
+  PERM=&#39;{&quot;edit&quot;:&quot;deny&quot;,&quot;bash&quot;:&quot;deny&quot;,&quot;webfetch&quot;:&quot;deny&quot;,&quot;websearch&quot;:&quot;deny&quot;,&quot;external_directory&quot;:&quot;deny&quot;}&#39;
+fi
+# WSL&#39;de /etc/resolv.conf, /mnt/wsl/resolv.conf&#39;a symlink: o tek dosya bağlanmazsa DNS çalışmaz
+DNS=(); if [ -e /mnt/wsl/resolv.conf ]; then DNS=(--ro-bind /mnt/wsl/resolv.conf /mnt/wsl/resolv.conf); fi
+exec bwrap --die-with-parent --new-session --unshare-pid --unshare-ipc --unshare-uts --unshare-cgroup-try --clearenv \
+  --setenv HOME &quot;$H&quot; --setenv PATH /usr/local/bin:/usr/bin:/bin --setenv LANG C.UTF-8 --setenv TERM dumb --setenv NO_COLOR 1 \
+  --setenv XDG_CONFIG_HOME /tmp/oc-cfg --setenv XDG_DATA_HOME &quot;$S/runs/$RUN/data&quot; --setenv XDG_STATE_HOME &quot;$S/runs/$RUN/state&quot; --setenv XDG_CACHE_HOME &quot;$S/cache&quot; \
+  --setenv OPENCODE_DISABLE_PROJECT_CONFIG 1 --setenv OPENCODE_DISABLE_AUTOUPDATE 1 --setenv OPENCODE_DISABLE_CLAUDE_CODE 1 \
+  --setenv OPENCODE_DISABLE_EXTERNAL_SKILLS 1 --setenv OPENCODE_DISABLE_LSP_DOWNLOAD 1 --setenv OPENCODE_PERMISSION &quot;$PERM&quot; \
+  &quot;${DNS[@]}&quot; --ro-bind /usr /usr --ro-bind /etc /etc --symlink usr/bin /bin --symlink usr/sbin /sbin --symlink usr/lib /lib --symlink usr/lib64 /lib64 \
+  --proc /proc --dev /dev --tmpfs /tmp --tmpfs /run --dir &quot;$H&quot; \
+  --ro-bind &quot;$H/.local/lib&quot; &quot;$H/.local/lib&quot; --bind &quot;$S&quot; &quot;$S&quot; \
+  &quot;${REPO[@]}&quot; --chdir &quot;$WORK&quot; -- &quot;$@&quot;</code></pre></figure><figure class="code"><figcaption>Dosya: <code>~/.local/lib/oc-worker/key-env.sh</code></figcaption><pre><code>#!/bin/bash
+# Sandbox içinde: anahtarı 3 numaralı tanımlayıcıdan oku, kapat, sadece opencode&#39;a ver. Anahtar dosyası burada yok.
+# OpenCode yapılandırma klasörüne yazıyor: her çalıştırma salt okunur şablonun sandbox tmpfs&#39;teki taze bir kopyasını alır.
+IFS= read -r K &lt;&amp;3 || true; exec 3&lt;&amp;-
+[ -n &quot;$K&quot; ] || { echo &quot;oc-worker: anahtar boş&quot; &gt;&amp;2; exit 4; }
+cp -r &quot;$HOME/.local/lib/oc-worker/config&quot; /tmp/oc-config; export OPENCODE_CONFIG_DIR=/tmp/oc-config
+export SHELL=&quot;$HOME/.local/lib/oc-worker/jail-shell&quot;   # ajan kabukları iç içe kullanıcı+pid namespace&#39;inde
+export OPENCODE_API_KEY=&quot;$K&quot;; unset K
+exec &quot;$@&quot;</code></pre></figure><figure class="code"><figcaption>Dosya: <code>~/.local/lib/oc-worker/jail-shell</code></figcaption><pre><code>#!/bin/bash
+# OpenCode&#39;un ajan komutları için kabuğu: iç içe kullanıcı + pid namespace. İçeriden, anahtarı tutan opencode süreci
+# görünmez; çekirdek, namespace sınırı boyunca ptrace / environ / mem erişimini reddeder.
+B=$(command -v bwrap) || { echo &quot;jail-shell: bwrap yok&quot; &gt;&amp;2; exit 1; }
+exec &quot;$B&quot; --unshare-user --unshare-pid --die-with-parent --dev-bind / / --proc /proc --unsetenv OPENCODE_API_KEY -- /bin/bash &quot;$@&quot;</code></pre></figure><figure class="code"><figcaption>Dosya: <code>~/.local/lib/oc-worker/config/opencode.json</code></figcaption><pre><code>{
+  &quot;$schema&quot;: &quot;https://opencode.ai/config.json&quot;,
+  &quot;model&quot;: &quot;opencode-go/deepseek-v4.1-flash&quot;,
+  &quot;autoupdate&quot;: false,
+  &quot;share&quot;: &quot;disabled&quot;,
+  &quot;enabled_providers&quot;: [&quot;opencode-go&quot;],
+  &quot;plugin&quot;: []
+}</code></pre></figure><figure class="code"><figcaption>Dosya: <code>~/.local/lib/oc-worker/config/plugins/strip-key.js</code></figcaption><pre><code>// Ajanın çalıştırdığı kabuk komutları API anahtarını miras almamalı: her kabuk ortamında boşalt.
+export const StripKey = async () =&gt; ({
+  &quot;shell.env&quot;: async (_input, output) =&gt; {
+    if (output &amp;&amp; output.env) { output.env.OPENCODE_API_KEY = &quot;&quot;; delete output.env.OPENCODE_API_KEY; output.env.OPENCODE_API_KEY = &quot;&quot;; }
+  },
+});</code></pre></figure><p>**Kendi kendine test (<code>check.sh</code>).<strong> Model çağırmadan, düz kabuk komutlarıyla sınırı kanıtlar. Wrapper&#39;da </strong>her** değişiklikten sonra tekrar çalıştır; hepsi PASS olmalı.</p><figure class="code"><figcaption>Dosya: <code>~/.local/lib/oc-worker/check.sh</code></figcaption><pre><code>#!/usr/bin/env bash
+# oc-worker sınırını model çağırmadan kanıtlar. Sadece ad ve PASS/FAIL yazar; hiçbir gizli bilgiyi yazdırmaz.
+# Bir test worktree&#39;si ister: varsayılan $LANE_WORKTREES/oc-worker-01 (ya da CHECK_W=/yol).
+set -u
+L=$HOME/.local/lib/oc-worker; WT=${LANE_WORKTREES:-$HOME/agent-lanes/worktrees}; W=${CHECK_W:-$WT/oc-worker-01}
+KEY=$HOME/.config/opencode-worker/api-key; pass=0; fail=0
+ok(){ if [ &quot;$2&quot; = yes ]; then pass=$((pass+1)); echo &quot;PASS $1&quot;; else fail=$((fail+1)); echo &quot;FAIL $1&quot;; fi; }
+[ -d &quot;$W&quot; ] || { echo &quot;test worktree&#39;si yok: $W  (lane new oc-worker-01 --from main, ya da CHECK_W=...)&quot; &gt;&amp;2; exit 2; }
+sb(){ local m=$1 c=$2; shift 2; &quot;$L/sandbox.sh&quot; &quot;$m&quot; &quot;$W&quot; &quot;$W&quot; /bin/bash -c &quot;$c&quot; _ &quot;$@&quot; 2&gt;/dev/null; }
+for p in &quot;$HOME/.ssh&quot; &quot;$HOME/.claude&quot; &quot;$HOME/.config&quot; &quot;$HOME/.bashrc&quot; &quot;$HOME/ai&quot; /mnt/c &quot;$(dirname &quot;$W&quot;)/../repo&quot;; do
+  [ &quot;$(sb ro &#39;[ -e &quot;$1&quot; ] &amp;&amp; echo yes || echo no&#39; &quot;$p&quot;)&quot; = no ] &amp;&amp; ok &quot;gizli: $p&quot; yes || ok &quot;gizli: $p&quot; no
+done
+[ -n &quot;$(sb ro &#39;ls -A | head -1&#39;)&quot; ] &amp;&amp; ok &quot;kontrol: repo içeriden okunuyor&quot; yes || ok &quot;kontrol: repo içeriden okunuyor&quot; no
+[ -z &quot;$(sb ro &#39;touch .oc-probe &amp;&amp; echo wrote&#39;)&quot; ] &amp;&amp; [ ! -e &quot;$W/.oc-probe&quot; ] &amp;&amp; ok &quot;ro: repoya yazma engelli&quot; yes || ok &quot;ro: repoya yazma engelli&quot; no
+[ &quot;$(sb rw &#39;touch .oc-probe &amp;&amp; rm .oc-probe &amp;&amp; echo yes&#39;)&quot; = yes ] &amp;&amp; ok &quot;rw: kendi worktree&#39;si yazılabilir&quot; yes || ok &quot;rw: kendi worktree&#39;si yazılabilir&quot; no
+[ -z &quot;$(sb rw &#39;echo x &gt;&gt; .git &amp;&amp; echo wrote&#39;)&quot; ] &amp;&amp; ok &quot;rw: .git salt okunur&quot; yes || ok &quot;rw: .git salt okunur&quot; no
+[ -z &quot;$(sb rw &#39;git status &gt;/dev/null 2&gt;&amp;1 &amp;&amp; echo works&#39;)&quot; ] &amp;&amp; ok &quot;rw: git içeride çalışmıyor&quot; yes || ok &quot;rw: git içeride çalışmıyor&quot; no
+n=$(sb ro &#39;ls /proc | grep -c &quot;^[0-9]&quot;&#39;); [ &quot;${n:-99}&quot; -le 4 ] &amp;&amp; ok &quot;host süreçleri görünmüyor ($n)&quot; yes || ok &quot;host süreçleri görünmüyor ($n)&quot; no
+[ &quot;$(sb ro &#39;touch /tmp/x &amp;&amp; echo yes&#39;)&quot; = yes ] &amp;&amp; ok &quot;kontrol: sandbox /tmp yazılabilir&quot; yes || ok &quot;kontrol: sandbox /tmp yazılabilir&quot; no
+[ &quot;$(sb ro &#39;getent hosts opencode.ai &gt;/dev/null &amp;&amp; echo yes&#39;)&quot; = yes ] &amp;&amp; ok &quot;kontrol: DNS çalışıyor&quot; yes || ok &quot;kontrol: DNS çalışıyor&quot; no
+if [ -f &quot;$KEY&quot; ]; then
+  [ &quot;$(stat -c %a &quot;$KEY&quot;)&quot; = 600 ] &amp;&amp; ok &quot;anahtar dosyası 600&quot; yes || ok &quot;anahtar dosyası 600&quot; no
+  exec 3&lt;&quot;$KEY&quot;
+  out=$(&quot;$L/sandbox.sh&quot; ro &quot;$W&quot; &quot;$W&quot; &quot;$L/key-env.sh&quot; /bin/bash -c &#39;
+    a=missing; [ -n &quot;${OPENCODE_API_KEY:-}&quot; ] &amp;&amp; a=loaded
+    b=file-visible; [ -e &quot;$HOME/.config/opencode-worker/api-key&quot; ] || b=file-hidden
+    c=fd-open; [ -e /proc/self/fd/3 ] || c=fd-closed
+    d=$(&quot;$SHELL&quot; -c &quot;echo \${OPENCODE_API_KEY:-none}&quot;)
+    e=$(OPENCODE_API_KEY= &quot;$SHELL&quot; -c &quot;cat /proc/[0-9]*/environ 2&gt;/dev/null | tr \&quot;\\0\&quot; \&quot;\\n\&quot; | grep -c \&quot;^OPENCODE_API_KEY=.\&quot;&quot;)   # eklentinin yaptığı gibi boş anahtarla: opencode süreci görünmemeli
+    echo &quot;$a $b $c shell-$([ &quot;$d&quot; = none ] &amp;&amp; echo clean || echo LEAK) procs-$([ &quot;$e&quot; = 0 ] &amp;&amp; echo clean || echo LEAK)&quot;&#39; 2&gt;/dev/null)
+  exec 3&lt;&amp;-
+  [ &quot;$out&quot; = &quot;loaded file-hidden fd-closed shell-clean procs-clean&quot; ] &amp;&amp; ok &quot;anahtar: opencode&#39;da var; dosya yok, fd kapalı, ajan kabuğunda yok&quot; yes || ok &quot;anahtar: [$out]&quot; no
+else
+  ok &quot;anahtar dosyası var ($KEY)&quot; no
+fi
+echo &quot;$pass/$((pass+fail))&quot;; [ &quot;$fail&quot; -eq 0 ]</code></pre></figure><figure class="code"><pre><code>chmod +x ~/.local/bin/oc-worker ~/.local/lib/oc-worker/*.sh ~/.local/lib/oc-worker/jail-shell</code></pre></figure><p>Test worktree&#39;si bölüm 9&#39;da <code>lane new</code> ile açılınca: <code>~/.local/lib/oc-worker/check.sh</code> → <code>17/17</code>.</p><p>İlk deneme (salt okunur, ucuz):</p><figure class="code"><pre><code>cd ~/ai/projects/&lt;konu&gt; &amp;&amp; oc-worker &quot;Bu repoda hangi dosyalar var? 5 satırda özetle.&quot;</code></pre></figure></section>
+<section id="b10"><h2>8. Command Code işçisi (<code>cc-worker</code>)</h2><p><strong>Hesap.</strong> commandcode.ai üzerinde küçük bir plan; model <code>deepseek/deepseek-v4.1-flash</code>. Mevcut model adlarını görmek için: <code>cmd --list-models</code>. (GLM 5.3 Flash ile A/B yaptık: zor işte ~3 kat hızlıydı, kalite eşit; yine de DeepSeek&#39;te kaldık. İkisi de olur.)</p><figure class="code"><pre><code>npm i -g command-code
+cmd --version                # komut adı &quot;cmd&quot; (Windows&#39;un cmd.exe&#39;siyle karışmaz, WSL&#39;de)
+mkdir -p ~/.config/command-code-worker ~/.commandcode &amp;&amp; chmod 700 ~/.config/command-code-worker
+nano ~/.config/command-code-worker/api-key &amp;&amp; chmod 600 ~/.config/command-code-worker/api-key</code></pre></figure><p>Etkileşimli kullanım da mümkün: bir klasörde <code>cmd</code> (yeni oturum), <code>cmd -c</code> (son konuşmaya devam), <code>cmd -r</code> (geçmişten seç). Ama işçi olarak her zaman aşağıdaki wrapper&#39;la.</p><p>Aynı tehdit modeli; anahtar yine 3 numaralı tanımlayıcıyla girer. Burada bir Node ön-yükleyici (<code>key-fd.cjs</code>) anahtarı süreç içinde tutar ve <strong>her alt süreçten</strong> siler; anahtar <code>/proc/self/environ</code>&#39;da hiç görünmez. Yazma modunda işçinin kendi izin dosyası salt okunur bağlanır: kendi kurallarını değiştiremez.</p><figure class="code"><figcaption>Dosya: <code>~/.local/bin/cc-worker</code></figcaption><pre><code>#!/usr/bin/env bash
+# cc-worker: Command Code (DeepSeek) işçisi. Mevcut repoda tek bir görev, allowlist sandbox içinde.
+#   cc-worker [-m MODEL] &quot;soru&quot;            salt okunur
+#   cc-worker --write [-m MODEL] &quot;görev&quot;   düzenler ve komut çalıştırır; sadece kendi worktree&#39;sinde (cc-worker-NN)
+# Sınırı CLI değil çekirdek koyar: kimlik bilgileri ve diğer klasörler sandbox&#39;ta yok. Anahtar tanımlayıcı ile girer.
+set -euo pipefail
+KEY=&quot;$HOME/.config/command-code-worker/api-key&quot;; LIB=&quot;$HOME/.local/lib&quot;
+WT=$(readlink -m &quot;${LANE_WORKTREES:-$HOME/agent-lanes/worktrees}&quot;)
+PROJ=$(readlink -m &quot;${AI_PROJECTS:-$HOME/ai/projects}&quot;)
+CC_JS=&quot;$LIB/node_modules/command-code/dist/index.mjs&quot;
+NODE=$(readlink -f &quot;$(command -v node)&quot;)
+MODEL=deepseek/deepseek-v4.1-flash; MODE=ro
+if [ &quot;${1:-}&quot; = &quot;--write&quot; ]; then MODE=rw; shift; fi
+if [ &quot;${1:-}&quot; = &quot;-m&quot; ]; then [ $# -ge 2 ] || { echo &quot;cc-worker: -m bir model ister&quot; &gt;&amp;2; exit 2; }; MODEL=$2; shift 2; fi
+[ $# -eq 1 ] &amp;&amp; [ -n &quot;$1&quot; ] &amp;&amp; [ &quot;${1#-}&quot; = &quot;$1&quot; ] || { echo &#39;kullanım: cc-worker [--write] [-m MODEL] &quot;görev&quot;&#39; &gt;&amp;2; exit 2; }
+HERE=$(pwd -P); ROOT=$(git -C &quot;$HERE&quot; rev-parse --show-toplevel 2&gt;/dev/null || echo &quot;$HERE&quot;)
+case &quot;$ROOT/&quot; in
+  &quot;$WT&quot;/?*|&quot;$PROJ&quot;/?*|/tmp/?*) ;;
+  *) echo &quot;cc-worker: reddedildi, izinli bir klasör değil: $ROOT&quot; &gt;&amp;2; exit 3;;
+esac
+if [ &quot;$MODE&quot; = rw ] &amp;&amp; ! [[ &quot;$ROOT&quot; =~ ^&quot;$WT&quot;/cc-worker(-[0-9]{1,3})?$ ]]; then
+  echo &quot;cc-worker: --write sadece $WT/cc-worker veya cc-worker-NN içinde çalışır&quot; &gt;&amp;2; exit 3
+fi
+case &quot;$NODE&quot; in /usr/*|&quot;$LIB&quot;/*) ;; *) echo &quot;cc-worker: node sandbox&#39;ta görünmez ($NODE); ~/.local/lib/nodejs altına kur&quot; &gt;&amp;2; exit 5;; esac
+[ -f &quot;$CC_JS&quot; ] || { echo &quot;cc-worker: command-code yok (npm i -g command-code)&quot; &gt;&amp;2; exit 5; }
+[ -f &quot;$KEY&quot; ] &amp;&amp; [ &quot;$(stat -c %a &quot;$KEY&quot;)&quot; = 600 ] || { echo &quot;cc-worker: anahtar dosyası yok ya da izni 600 değil: $KEY&quot; &gt;&amp;2; exit 4; }
+ARGS=(-p &quot;$1&quot; --skip-onboarding --trust --no-auto-update --no-session --max-turns 120 -m &quot;$MODEL&quot;)
+# Başsız (headless) yazma ve komut için --yolo gerekir. Sınırları bayrak değil sandbox ve salt okunur kural dosyası koyar.
+if [ &quot;$MODE&quot; = rw ]; then ARGS+=(--yolo --max-turns 400); fi
+exec 3&lt;&quot;$KEY&quot; &lt;/dev/null   # görev argümanla gelir; stdin kullanılmaz
+exec &quot;$LIB/cc-worker/sandbox.sh&quot; &quot;$MODE&quot; &quot;$ROOT&quot; &quot;$HERE&quot; &quot;$NODE&quot; --require &quot;$LIB/cc-worker/key-fd.cjs&quot; &quot;$CC_JS&quot; &quot;${ARGS[@]}&quot;</code></pre></figure><figure class="code"><figcaption>Dosya: <code>~/.local/lib/cc-worker/sandbox.sh</code></figcaption><pre><code>#!/usr/bin/env bash
+# Allowlist sandbox: sandbox.sh ro|rw ROOT WORKDIR komut...   İçeride sadece işletim sistemi, program dosyaları ve ROOT var.
+# rw: .git salt okunur (yeniden yazılmış bir .git işaretçisi gözden geçirenin git&#39;inde kod çalıştırabilir) ve işçinin
+# izin dosyası salt okunur bağlanır.
+set -euo pipefail
+MODE=$1; ROOT=$2; WORK=$3; shift 3
+H=$HOME; mkdir -p &quot;$H/.commandcode&quot;
+if [ &quot;$MODE&quot; = rw ]; then
+  mkdir -p &quot;$ROOT/.commandcode&quot;
+  REPO=(--bind &quot;$ROOT&quot; &quot;$ROOT&quot; --ro-bind &quot;$H/.local/lib/cc-worker/worker-settings.json&quot; &quot;$ROOT/.commandcode/settings.local.json&quot;)
+  if [ -e &quot;$ROOT/.git&quot; ]; then REPO+=(--ro-bind &quot;$ROOT/.git&quot; &quot;$ROOT/.git&quot;); fi
+else
+  REPO=(--ro-bind &quot;$ROOT&quot; &quot;$ROOT&quot;)
+fi
+DNS=(); if [ -e /mnt/wsl/resolv.conf ]; then DNS=(--ro-bind /mnt/wsl/resolv.conf /mnt/wsl/resolv.conf); fi
+exec bwrap --die-with-parent --new-session --unshare-pid --unshare-ipc --unshare-uts --unshare-cgroup-try --clearenv \
+  --setenv HOME &quot;$H&quot; --setenv PATH /usr/local/bin:/usr/bin:/bin --setenv LANG C.UTF-8 --setenv TERM dumb --setenv NO_COLOR 1 \
+  &quot;${DNS[@]}&quot; --ro-bind /usr /usr --ro-bind /etc /etc --symlink usr/bin /bin --symlink usr/sbin /sbin --symlink usr/lib /lib --symlink usr/lib64 /lib64 \
+  --proc /proc --dev /dev --tmpfs /tmp --tmpfs /run --dir &quot;$H&quot; \
+  --ro-bind &quot;$H/.local/lib&quot; &quot;$H/.local/lib&quot; --bind &quot;$H/.commandcode&quot; &quot;$H/.commandcode&quot; \
+  &quot;${REPO[@]}&quot; --chdir &quot;$WORK&quot; -- &quot;$@&quot;</code></pre></figure><figure class="code"><figcaption>Dosya: <code>~/.local/lib/cc-worker/key-fd.cjs</code></figcaption><pre><code>// API anahtarını devralınan 3 numaralı tanımlayıcıdan yükler, sonra kapatır. Anahtar exec ortamına hiç girmez, yani
+// /proc/self/environ&#39;da yoktur; anahtar dosyası da sandbox&#39;ta yoktur. CLI onu process.env&#39;de ister, bu yüzden her alt
+// süreç anahtarsız başlatılır: ajanın çalıştırdığı komutlar anahtarı miras almaz.
+const fs = require(&#39;fs&#39;), cp = require(&#39;child_process&#39;);
+const NAME = &#39;COMMAND_CODE_API_KEY&#39;;
+const key = fs.readFileSync(3, &#39;utf8&#39;).trim();
+fs.closeSync(3);
+if (!key) { process.stderr.write(&#39;cc-worker: anahtar boş\n&#39;); process.exit(4); }
+process.env[NAME] = key;
+const spawnChild = cp.ChildProcess.prototype.spawn;
+cp.ChildProcess.prototype.spawn = function (options) {
+  if (options &amp;&amp; options.envPairs) options.envPairs = options.envPairs.filter((p) =&gt; !p.startsWith(NAME + &#39;=&#39;));
+  return spawnChild.call(this, options);
+};
+const clean = (options) =&gt; {
+  const env = { ...((options &amp;&amp; options.env) || process.env) };
+  delete env[NAME];
+  return { ...(options || {}), env };
+};
+const lastOptions = (args) =&gt; {            // (file, options) ya da (file, args, options); options isteğe bağlı
+  const out = [...args];
+  const i = out.length &gt; 1 &amp;&amp; out[out.length - 1] &amp;&amp; typeof out[out.length - 1] === &#39;object&#39; &amp;&amp; !Array.isArray(out[out.length - 1]) ? out.length - 1 : -1;
+  if (i &gt;= 0) out[i] = clean(out[i]); else out.push(clean());
+  return out;
+};
+for (const f of [&#39;spawnSync&#39;, &#39;execSync&#39;, &#39;execFileSync&#39;]) {
+  const real = cp[f];
+  cp[f] = function (...args) {
+    if (f === &#39;spawnSync&#39; &amp;&amp; args.length === 1) args.push([]);
+    if (f === &#39;execFileSync&#39; &amp;&amp; args.length === 1) args.push([]);
+    return real.apply(this, lastOptions(args));
+  };
+}
+require(&#39;module&#39;).syncBuiltinESMExports();   // CLI bir ES modülü: import&#39;ları da bu sarmalayıcıları görmeli</code></pre></figure><figure class="code"><figcaption>Dosya: <code>~/.local/lib/cc-worker/worker-settings.json</code></figcaption><pre><code>{
+ &quot;permissions&quot;: {
+  &quot;defaultMode&quot;: &quot;dont-ask&quot;,
+  &quot;allow&quot;: [&quot;Edit(**)&quot;, &quot;Write(**)&quot;, &quot;Shell&quot;],
+  &quot;deny&quot;: [
+   &quot;WebFetch&quot;, &quot;WebSearch&quot;,
+   &quot;Edit(.commandcode/**)&quot;, &quot;Write(.commandcode/**)&quot;,
+   &quot;Edit(.git/**)&quot;, &quot;Write(.git/**)&quot;
+  ]
+ }
+}</code></pre></figure><figure class="code"><figcaption>Dosya: <code>~/.local/lib/cc-worker/check.sh</code></figcaption><pre><code>#!/usr/bin/env bash
+# cc-worker sınırını model çağırmadan kanıtlar. Sadece ad ve PASS/FAIL yazar; hiçbir gizli bilgiyi yazdırmaz.
+set -u
+L=$HOME/.local/lib; WT=${LANE_WORKTREES:-$HOME/agent-lanes/worktrees}; W=${CHECK_W:-$WT/cc-worker-01}
+KEY=$HOME/.config/command-code-worker/api-key; NODE=$(readlink -f &quot;$(command -v node)&quot;); pass=0; fail=0
+ok(){ if [ &quot;$2&quot; = yes ]; then pass=$((pass+1)); echo &quot;PASS $1&quot;; else fail=$((fail+1)); echo &quot;FAIL $1&quot;; fi; }
+[ -d &quot;$W&quot; ] || { echo &quot;test worktree&#39;si yok: $W  (lane new cc-worker-01 --from main, ya da CHECK_W=...)&quot; &gt;&amp;2; exit 2; }
+sb(){ local m=$1 c=$2; shift 2; &quot;$L/cc-worker/sandbox.sh&quot; &quot;$m&quot; &quot;$W&quot; &quot;$W&quot; /bin/bash -c &quot;$c&quot; _ &quot;$@&quot; 2&gt;/dev/null; }
+for p in &quot;$HOME/.ssh&quot; &quot;$HOME/.claude&quot; &quot;$HOME/.config&quot; &quot;$HOME/.bashrc&quot; &quot;$HOME/ai&quot; /mnt/c &quot;$(dirname &quot;$W&quot;)/../repo&quot;; do
+  [ &quot;$(sb ro &#39;[ -e &quot;$1&quot; ] &amp;&amp; echo yes || echo no&#39; &quot;$p&quot;)&quot; = no ] &amp;&amp; ok &quot;gizli: $p&quot; yes || ok &quot;gizli: $p&quot; no
+done
+[ -n &quot;$(sb ro &#39;ls -A | head -1&#39;)&quot; ] &amp;&amp; ok &quot;kontrol: repo içeriden okunuyor&quot; yes || ok &quot;kontrol: repo içeriden okunuyor&quot; no
+[ -z &quot;$(sb ro &#39;touch .cc-probe &amp;&amp; echo wrote&#39;)&quot; ] &amp;&amp; [ ! -e &quot;$W/.cc-probe&quot; ] &amp;&amp; ok &quot;ro: repoya yazma engelli&quot; yes || ok &quot;ro: repoya yazma engelli&quot; no
+[ &quot;$(sb rw &#39;touch .cc-probe &amp;&amp; rm .cc-probe &amp;&amp; echo yes&#39;)&quot; = yes ] &amp;&amp; ok &quot;rw: kendi worktree&#39;si yazılabilir&quot; yes || ok &quot;rw: kendi worktree&#39;si yazılabilir&quot; no
+[ -z &quot;$(sb rw &#39;echo x &gt;&gt; .git &amp;&amp; echo wrote&#39;)&quot; ] &amp;&amp; ok &quot;rw: .git salt okunur&quot; yes || ok &quot;rw: .git salt okunur&quot; no
+[ -z &quot;$(sb rw &#39;git status &gt;/dev/null 2&gt;&amp;1 &amp;&amp; echo works&#39;)&quot; ] &amp;&amp; ok &quot;rw: git içeride çalışmıyor&quot; yes || ok &quot;rw: git içeride çalışmıyor&quot; no
+[ -z &quot;$(sb rw &#39;echo x &gt;&gt; .commandcode/settings.local.json &amp;&amp; echo wrote&#39;)&quot; ] &amp;&amp; ok &quot;rw: işçi kendi kurallarını değiştiremez&quot; yes || ok &quot;rw: işçi kendi kurallarını değiştiremez&quot; no
+n=$(sb ro &#39;ls /proc | grep -c &quot;^[0-9]&quot;&#39;); [ &quot;${n:-99}&quot; -le 4 ] &amp;&amp; ok &quot;host süreçleri görünmüyor ($n)&quot; yes || ok &quot;host süreçleri görünmüyor ($n)&quot; no
+[ &quot;$(sb ro &#39;getent hosts commandcode.ai &gt;/dev/null &amp;&amp; echo yes&#39;)&quot; = yes ] &amp;&amp; ok &quot;kontrol: DNS çalışıyor&quot; yes || ok &quot;kontrol: DNS çalışıyor&quot; no
+if [ -f &quot;$KEY&quot; ]; then
+  [ &quot;$(stat -c %a &quot;$KEY&quot;)&quot; = 600 ] &amp;&amp; ok &quot;anahtar dosyası 600&quot; yes || ok &quot;anahtar dosyası 600&quot; no
+  exec 3&lt;&quot;$KEY&quot;
+  out=$(&quot;$L/cc-worker/sandbox.sh&quot; ro &quot;$W&quot; &quot;$W&quot; &quot;$NODE&quot; --require &quot;$L/cc-worker/key-fd.cjs&quot; -e &#39;
+const fs=require(&quot;fs&quot;),cp=require(&quot;child_process&quot;);const k=process.env.COMMAND_CODE_API_KEY||&quot;&quot;;
+const env=fs.readFileSync(&quot;/proc/self/environ&quot;,&quot;latin1&quot;);
+let fd=&quot;fd-closed&quot;;try{fs.fstatSync(3);fd=&quot;fd-open&quot;}catch{}
+const child=cp.execSync(&quot;printenv COMMAND_CODE_API_KEY || echo none&quot;).toString().trim();
+console.log([k.length&gt;8?&quot;loaded&quot;:&quot;missing&quot;,env.includes(k)||env.includes(&quot;COMMAND_CODE&quot;)?&quot;in-environ&quot;:&quot;not-in-environ&quot;,fd,child===&quot;none&quot;?&quot;child-clean&quot;:&quot;child-LEAK&quot;].join(&quot; &quot;))&#39; 2&gt;/dev/null)
+  exec 3&lt;&amp;-
+  [ &quot;$out&quot; = &quot;loaded not-in-environ fd-closed child-clean&quot; ] &amp;&amp; ok &quot;anahtar: kullanılabilir; environ&#39;da yok, fd kapalı, alt süreçte yok&quot; yes || ok &quot;anahtar: [$out]&quot; no
+else
+  ok &quot;anahtar dosyası var ($KEY)&quot; no
+fi
+echo &quot;$pass/$((pass+fail))&quot;; [ &quot;$fail&quot; -eq 0 ]</code></pre></figure><figure class="code"><pre><code>chmod +x ~/.local/bin/cc-worker ~/.local/lib/cc-worker/*.sh</code></pre></figure><p>Test worktree&#39;si açılınca: <code>~/.local/lib/cc-worker/check.sh</code> → <code>17/17</code>. Worktree&#39;lerde <code>.commandcode/</code> klasörü oluşur; ana repoda <code>.gitignore</code>&#39;a ekle (Python projelerinde <code>__pycache__/</code> da, yoksa <code>lane run</code> onları &quot;listelenmemiş değişiklik&quot; diye raporlar).</p></section>
+<section id="b11"><h2>9. agent-lanes (<code>lane</code>)</h2><p><code>lane</code> küçük bir Python aracı (sadece standart kütüphane, bağımlılık yok). Repo bağlantısını sana ayrıca gönderiyoruz.</p><figure class="code"><pre><code>cd ~ &amp;&amp; git clone &lt;AGENT_LANES_REPO_URL&gt; agent-lanes-tool
+cd agent-lanes-tool &amp;&amp; python3 -m unittest discover -s agent_lanes      # tüm testler geçmeli
+ln -s &quot;$PWD/agent_lanes/lane.py&quot; ~/.local/bin/lane
+lane --help</code></pre></figure><p>Ayarlar ortam değişkeniyle (varsayılanlar bu rehberin düzeniyle aynı, bir şey yapmana gerek yok):</p><div class="tw"><table><thead><tr><th scope="col">Değişken</th><th scope="col">Varsayılan</th><th scope="col">Anlamı</th></tr></thead><tbody><tr><td><code>LANE_ROOT</code></td><td><code>~/agent-lanes</code></td><td>Ana klasör</td></tr><tr><td><code>LANE_MAIN_REPO</code></td><td><code>$LANE_ROOT/repo</code></td><td>Lane&#39;lerin dallandığı repo</td></tr><tr><td><code>LANE_WORKTREES</code></td><td><code>$LANE_ROOT/worktrees</code></td><td>Worktree&#39;ler (wrapper&#39;lar da bunu okur)</td></tr><tr><td><code>LANE_STATE_DIR</code></td><td><code>$LANE_ROOT/lanes</code></td><td>Defter, loglar, raporlar: worktree dışında, işçi taklit edemez</td></tr><tr><td><code>LANE_OC_BIN</code> / <code>LANE_CC_BIN</code></td><td><code>oc-worker</code> / <code>cc-worker</code></td><td><code>oc-worker-N</code> / <code>cc-worker-N</code> lane&#39;leri için işçi komutu</td></tr></tbody></table></div><p>Projen başka yerdeyse: <code>export LANE_MAIN_REPO=~/ai/projects/&lt;konu&gt;</code> (<code>.bashrc</code> en üstüne ya da proje CLAUDE.md&#39;sinde Claude&#39;a söyle). Ya da ana repoyu <code>~/agent-lanes/repo</code> olarak klonla.</p><p><strong>Bir lane, baştan sona:</strong></p><figure class="code"><pre><code>lane new oc-worker-01 --from main --branch agent/oc-worker-01-parser   # worktree + dal + defter kaydı
+~/.local/lib/oc-worker/check.sh                                          # ilk seferde: sandbox testi
+nano /tmp/brief.md                                                       # BAĞLAM / GÖREV / GÜVENLİK / KABUL
+lane run oc-worker-01 /tmp/brief.md                                      # bekler; işçi bitince çıkar
+cat ~/agent-lanes/worktrees/oc-worker-01/.lane/REPORT.md
+git -C ~/agent-lanes/worktrees/oc-worker-01 diff main                    # ÇALIŞTIRMADAN ÖNCE OKU
+lane mutants oc-worker-01                                                # değişen satırlara mutant önerisi
+lane accept oc-worker-01 --test &quot;python3 -m pytest -q&quot; --mutants mutants.json
+lane merge oc-worker-01 -m &quot;parser eklendi&quot; --test &quot;python3 -m pytest -q&quot;
+lane ls                                                                  # defter
+lane gc                                                                  # kuru çalıştırma: ne silinebilir</code></pre></figure><p>Bunları genelde sen yazmazsın: Claude&#39;a &quot;bunu iki oc-worker lane&#39;ine böl ve yaptır&quot; dersin, skill (bölüm 17) Claude&#39;a bu akışı öğretir.</p><p><strong>Brief şablonu:</strong></p><figure class="code"><pre><code>BAĞLAM   - kod ne, yollar, NEYE DOKUNULMAYACAK (diğer lane&#39;lerin dosyaları, yapılandırma)
+GÖREV    - tam davranış, arayüzler, dosya adları
+GÜVENLİK - kesin kurallar: hata durumunda kapalı kal, kodda ağ çağrısı yok, yıkıcı her şey varsayılan olarak kuru çalıştırma
+KABUL    - sayılar: test sayısı, olması gereken adlı durumlar, gözden geçirenin tekrar koşacağı komutlar,
+           ve &quot;gözden geçiren testlerini mutasyona uğratacak&quot;</code></pre></figure><p><code>lane run</code> brief&#39;in sonuna sonuç sözleşmesini ekler: işçi <code>.lane/LANE_RESULT.json</code> (durum, özet, değişen dosyalar, test sayıları, iddialar, engeller) ve en fazla 60 satır <code>.lane/REPORT.md</code> yazmak zorunda. Claude 30 satır okur, bütün transkripti değil; sonra her sayıyı kendisi doğrular.</p><p><strong>Mutant nedir:</strong> işçinin kodunda bilerek bir hata (bir güvenlik kontrolünü silmek, <code>&lt;</code>&#39;yi <code>&lt;=</code> yapmak, zorunlu bir argümanı kaldırmak). İşçinin testleri bu hatayı yakalamıyorsa testler yetersizdir. <code>mutants.json</code> örneği:</p><figure class="code"><pre><code>[
+  {&quot;name&quot;: &quot;boş girdi kontrolünü kaldır&quot;, &quot;file&quot;: &quot;src/parser.py&quot;,
+   &quot;find&quot;: &quot;    if not rows:\n        raise ValueError&quot;, &quot;replace&quot;: &quot;    if False:\n        raise ValueError&quot;},
+  {&quot;name&quot;: &quot;sınırda bir fazla&quot;, &quot;file&quot;: &quot;src/parser.py&quot;,
+   &quot;find&quot;: &quot;if count &gt; limit:&quot;, &quot;replace&quot;: &quot;if count &gt;= limit:&quot;}
+]</code></pre></figure><p><strong>herdr&#39;da izlemek.</strong> <code>lane run</code> işçiyi başsız çalıştırır. İzlemek için herdr&#39;da <code>lanes</code> adlı bir workspace aç ve her lane için bir sekmede logu takip et: <code>tail -f ~/agent-lanes/lanes/oc-worker-01/run-*.log</code>. (Bizim kendi sürümümüzde <code>lane run --herdr</code> işçiyi doğrudan herdr sekmesinde açıyor ve bitince sekmeyi &quot;bitti&quot; yapıyor; Heeler de push atıyor. Açık kaynak sürümde bu yok; istersen Claude&#39;a ekletebilirsin, ama kural: <strong>herdr soketi asla sandbox&#39;a girmez</strong>, sekmeyi sandbox dışındaki <code>lane</code> yönetir.)</p><p><strong>Kurallarımız:</strong></p><ul><li>Aynı anda yaklaşık 5 lane. Paralel lane&#39;ler <strong>dosya bazında</strong> bölünür; ortak arayüz iki brief&#39;e de yazılır.</li><li>Diff&#39;i okumadan hiçbir şey çalıştırma: <code>accept</code>, işçi kodunu sandbox <strong>dışında</strong> çalıştırır.</li><li>Her zaman mutasyon: 3-6 mutant. İşçinin &quot;test edildi&quot; iddiası birden çok kez bir mutantta çöktü.</li><li>Mutant koşusu bitmeden commit mesajına sayı yazma (bir kere 10/10 yazıp 8/10&#39;a düzeltmek zorunda kaldık).</li><li>İşçiler commit atmaz, merge etmez, kimlik bilgisi almaz. PASS&#39;ten sonra commit&#39;i Claude atar.</li><li>Lane&#39;leri döngüyle yoklayarak bekleme; <code>lane run</code>&#39;ı arka planda başlat, bitince haber gelir.</li><li><code>lane gc --apply</code> sadece sen onaylayınca.</li></ul></section>
+<section id="b12"><h2>10. Telefon: Windows sshd + WSL sshd + Heeler</h2><p>Hedef: telefondan PC&#39;deki herdr&#39;a bağlanmak. Yol: telefon → (Tailscale) → Windows OpenSSH (port 22, sadece tailnet) → atlama (jump) → WSL içindeki kullanıcı sshd&#39;si (<code>127.0.0.1:2222</code>) → herdr. Neden iki sshd: Windows sshd&#39;ye doğrudan giriş Windows kabuğuna düşer; WSL&#39;e geçmek için zorunlu komut (<code>command=wsl.exe ...</code>) kullanmak SSH çoğullamasıyla (ControlMaster) bozuluyor: sonraki oturumlar ilk komutu tekrar çalıştırıyor. Jump host ise temiz ve doğrudan Linux&#39;a iner.</p><p><strong>10.1 WSL içinde kullanıcı sshd&#39;si (2222, sadece localhost):</strong></p><figure class="code"><pre><code>sudo apt install -y openssh-server
+sudo systemctl disable --now ssh.service ssh.socket      # sistem sshd&#39;si (22) WSL&#39;de gerekmiyor
+mkdir -p ~/.local/opt/wsl-sshd ~/.ssh &amp;&amp; chmod 700 ~/.ssh &amp;&amp; touch ~/.ssh/authorized_keys &amp;&amp; chmod 600 ~/.ssh/authorized_keys
+ssh-keygen -t ed25519 -N &#39;&#39; -f ~/.local/opt/wsl-sshd/ssh_host_ed25519_key
+cat &gt; ~/.local/opt/wsl-sshd/sshd_config &lt;&lt;EOF
+# Heeler (telefon) için yetkisiz sshd: sadece localhost; Windows sshd üzerinden ProxyJump ile ulaşılır.
+ListenAddress 127.0.0.1
+Port 2222
+HostKey $HOME/.local/opt/wsl-sshd/ssh_host_ed25519_key
+PidFile $HOME/.local/opt/wsl-sshd/sshd.pid
+AuthorizedKeysFile .ssh/authorized_keys
+AllowUsers $USER
+PubkeyAuthentication yes
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+UsePAM no
+PermitRootLogin no
+StrictModes yes
+X11Forwarding no
+AllowAgentForwarding yes
+AllowTcpForwarding local
+AllowStreamLocalForwarding local
+PermitTunnel no
+Subsystem sftp /usr/lib/openssh/sftp-server
+LogLevel INFO
+EOF</code></pre></figure><figure class="code"><figcaption>Dosya: <code>~/.config/systemd/user/wsl-sshd.service</code></figcaption><pre><code>[Unit]
+Description=Yetkisiz sshd, 127.0.0.1:2222: Heeler (telefon) ile bu PC&#39;deki herdr&#39;a erişim
+
+[Service]
+ExecStart=/usr/sbin/sshd -D -e -f %h/.local/opt/wsl-sshd/sshd_config
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target</code></pre></figure><figure class="code"><pre><code>systemctl --user daemon-reload &amp;&amp; systemctl --user enable --now wsl-sshd
+systemctl --user status wsl-sshd        # active (running); &quot;login records&quot; uyarısı normal (root değil)</code></pre></figure><p><strong>10.2 Windows OpenSSH Server.</strong> <strong>Yönetici</strong> PowerShell:</p><figure class="code"><pre><code>Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
+Set-Service sshd -StartupType Automatic
+Start-Service sshd
+# Güvenlik duvarı: sshd sadece &quot;Private&quot; ağ profilinde açık. Tailscale arayüzünü Private yap.
+Set-NetFirewallRule -Name OpenSSH-Server-In-TCP -Profile Private
+Get-NetConnectionProfile                                  # Tailscale satırının adını gör
+Set-NetConnectionProfile -InterfaceAlias Tailscale -NetworkCategory Private</code></pre></figure><p>Ev Ethernet/Wi-Fi&#39;n &quot;Public&quot; kalsın; o zaman sshd sadece tailnet&#39;ten erişilebilir. (Ev ağın Private ise sshd evden de erişilir; anahtar-zorunlu olduğu için sorun değil ama bil.)</p><p><strong>Anahtarlar.</strong> Windows kullanıcın <strong>yönetici</strong> ise Windows anahtarları <code>C:\ProgramData\ssh\administrators_authorized_keys</code> dosyasına gider (kullanıcı klasöründeki <code>authorized_keys</code> yöneticiler için okunmaz!). Yönetici değilse <code>C:\Users\&lt;WINDOWS_KULLANICI&gt;\.ssh\authorized_keys</code>. Yönetici durumu için dosya izni şart:</p><figure class="code"><pre><code>icacls.exe &quot;C:\ProgramData\ssh\administrators_authorized_keys&quot; /inheritance:r /grant &quot;Administrators:F&quot; /grant &quot;SYSTEM:F&quot;</code></pre></figure><p>Anahtarlar çalıştığını gördükten <strong>sonra</strong> şifre girişini kapat: <code>C:\ProgramData\ssh\sshd_config</code> dosyasını önce yedekle (<code>copy sshd_config sshd_config.bak-YYYYMMDD</code>), sonra şunları ayarla ve <code>Restart-Service sshd</code>:</p><figure class="code"><pre><code>PasswordAuthentication no
+KbdInteractiveAuthentication no</code></pre></figure><p><strong>10.3 Heeler.</strong> App Store&#39;dan <strong>Heeler</strong> (iPhone, iPad, Mac). Uygulamada yeni host:</p><div class="tw"><table><thead><tr><th scope="col">Alan</th><th scope="col">Değer</th></tr></thead><tbody><tr><td>Host</td><td><code>127.0.0.1</code></td></tr><tr><td>Port</td><td><code>2222</code></td></tr><tr><td>Kullanıcı</td><td>WSL kullanıcın</td></tr><tr><td>Jump Host</td><td><code>&lt;PC_TAILNET_ADI&gt;</code>, port 22, kullanıcı <code>&lt;WINDOWS_KULLANICI&gt;</code></td></tr><tr><td>Anahtar</td><td>Heeler&#39;ın cihazda ürettiği anahtar</td></tr><tr><td>Backend</td><td>Herdr TUI</td></tr></tbody></table></div><p>Heeler&#39;ın <strong>açık anahtarını</strong> iki yere ekle: Windows tarafı (yukarıdaki dosya) ve WSL <code>~/.ssh/authorized_keys</code>. Her cihazın (telefon, iPad, Mac) kendi anahtarı olsun. Anahtarları <strong>gövdesine</strong> göre eşleştir, etiketine göre değil: iki cihaz aynı etiketle (&quot;heeler&quot;) anahtar üretebiliyor.</p><p><strong>10.4 Heeler eklentisi (push bildirimi).</strong> WSL&#39;de, herdr içinde (Node 20+ gerekir):</p><figure class="code"><pre><code>herdr plugin install ZingerLittleBee/Heeler --ref plugin --yes
+herdr plugin list                         # heeler: enabled
+herdr plugin action list                  # eşleştirme (QR) eylemini bul ve çalıştır, telefonla QR&#39;ı okut
+herdr plugin log list --plugin heeler     # sorun olursa</code></pre></figure><p>Bildirimler uçtan uca şifreli bir aktarma sunucusu üzerinden gelir. Bir pane &quot;bitti&quot; olunca (Claude cevabı bitirince, işçi bitince) telefona push gelir.</p><p><strong>Heeler&#39;da bilmen gerekenler:</strong> canlı terminal bağlantısı pane başına <strong>tektir</strong> (telefondan bağlanınca PC&#39;deki görünüm &quot;taken over&quot; olabilir); Chat görünümü paylaşılır. Telefonda düz bir SSH istemcisi de çalışır; Heeler herdr&#39;ı tanıyan görünüm ve push&#39;u ekler.</p><p><strong>PC&#39;den PC&#39;ye test</strong> (Heeler&#39;dan önce, WSL içinden):</p><figure class="code"><pre><code>ssh -J &lt;WINDOWS_KULLANICI&gt;@&lt;PC_TAILNET_ADI&gt; -p 2222 $USER@127.0.0.1 &#39;herdr --version&#39;</code></pre></figure></section>
+<section id="b13"><h2>11. (İsteğe bağlı) ikinci makine</h2><p>İkinci bir PC/laptop varsa: uzun CPU işleri (test matrisleri, backtest, grid) oraya gider, git ve merge ana PC&#39;de kalır.</p><ol><li>İkinci makineye 1-10 arasını kur (Claude Code şart değil; WSL, Node, işçiler, herdr, sshd yeter).</li><li>Ana PC&#39;de <code>~/.ssh/config</code>:</li></ol><figure class="code"><pre><code>Host laptop
+  HostName &lt;LAPTOP_TAILNET_ADI&gt;
+  User &lt;LAPTOP_WINDOWS_KULLANICI&gt;
+  IdentityFile ~/.ssh/id_ed25519_laptop
+Host laptop-wsl
+  HostName 127.0.0.1
+  Port 2222
+  User &lt;LAPTOP_WSL_KULLANICI&gt;
+  ProxyJump laptop
+  IdentityFile ~/.ssh/id_ed25519_laptop</code></pre></figure><figure class="code"><pre><code>ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_laptop -N &#39;&#39;     # açık anahtarı laptop&#39;ta iki yere ekle (10.2 + WSL)
+ssh laptop-wsl &#39;command -v oc-worker lane herdr&#39;           # PATH .bashrc en üstünde değilse burada boş döner
+herdr machine add laptop-wsl --label laptop                # herdr kenar çubuğunda laptop görünür</code></pre></figure><ol><li>agent-lanes: <code>~/.config/agent-lanes/hosts.toml</code>:</li></ol><figure class="code"><pre><code>[hosts.laptop]
+ssh = &quot;laptop-wsl&quot;
+root = &quot;~/agent-lanes/worktrees&quot;
+worker = &quot;oc-worker&quot;
+nice = 19
+max_lanes = 2</code></pre></figure><figure class="code"><pre><code>lane host check laptop &amp;&amp; lane host setup laptop
+lane run oc-worker-07 /tmp/brief.md --host laptop           # rsync ile gönderir, uzakta çalıştırır, sonucu çeker
+lane queue work.json --hosts local,laptop --max 3</code></pre></figure><p>Uzak lane&#39;ler <code>systemd --user</code> birimleri olarak <code>nice 19</code> ile çalışır; SSH kapansa da ölmez (düz <code>setsid nohup</code> ile başlatılan bir işin SSH kapanınca öldüğünü gördük).</p><p><strong>Mac için:</strong> <code>brew install herdr</code> ya da kurulum betiği; Node <code>brew install node</code>; macOS&#39;ta etkileşimsiz SSH PATH&#39;i için <code>~/.zshenv</code> içine <code>eval &quot;$(/opt/homebrew/bin/brew shellenv)&quot;</code>. macOS&#39;ta sshd: Sistem Ayarları → Genel → Paylaşma → Uzaktan Giriş. Şifreyle girişi kapatmak için <code>/etc/ssh/sshd_config.d/000-no-password.conf</code> içine <code>PasswordAuthentication no</code> ve <code>KbdInteractiveAuthentication no</code>. Mac&#39;te bwrap yok: Mac&#39;i işçi makinesi değil, ayrı bir proje makinesi olarak kullanıyoruz.</p></section>
+<section id="b14"><h2>12. Yeniden başlatma sonrası rutin</h2><ol><li>WezTerm&#39;i aç → <code>Alt+L</code> → <strong>WSL Ubuntu-24.04</strong>. Bu WSL girişi kullanıcı servislerini başlatır (linger kapalıysa).</li><li>Kontrol:</li></ol><figure class="code"><pre><code>systemctl --user status herdr-server wsl-sshd     # ikisi de active
+systemctl --user restart herdr-server wsl-sshd    # değilse</code></pre></figure><ol><li><code>herdr</code> ile bağlan. Workspace&#39;ler ve sekmeler duruyor ama içlerinde çalışan programlar kapanmış olur.</li><li>Her workspace&#39;te Claude&#39;a dön: <code>claude -c</code> (son konuşma) ya da <code>claude -r</code> (seç). Command Code için <code>cmd -c</code> / <code>cmd -r</code>.</li><li>Yarım kalan lane&#39;ler: <code>lane ls</code>; bitmemiş bir lane&#39;i aynı brief&#39;le yeniden <code>lane run</code> ile başlat.</li><li>Heeler bağlanmıyorsa: genelde sadece 1. adım unutulmuştur.</li></ol></section>
+<section id="b15"><h2>13. Güncelleme rutini</h2><figure class="code"><pre><code># WSL / Ubuntu
+sudo apt update &amp;&amp; sudo apt upgrade -y
+# Claude Code kendini günceller; OpenCode ve Command Code:
+npm i -g opencode-ai command-code
+herdr update
+lane --help &gt;/dev/null &amp;&amp; (cd ~/agent-lanes-tool &amp;&amp; git pull &amp;&amp; python3 -m unittest discover -s agent_lanes -q)
+# Her işçi güncellemesinden sonra:
+~/.local/lib/oc-worker/check.sh &amp;&amp; ~/.local/lib/cc-worker/check.sh
+herdr plugin update</code></pre></figure><p>Windows:</p><figure class="code"><pre><code>winget upgrade                          # listeyi gör
+winget upgrade --id &lt;PAKET_ID&gt; --exact  # tek tek</code></pre></figure><p>Bizim deneyimlerimiz:</p><ul><li><code>winget upgrade --all</code> yerine tek tek: bazı kurucular haber vermeden <strong>bilgisayarı yeniden başlattı</strong>; WSL ve içindeki her şey kapandı.</li><li><strong>WSL&#39;in kendi güncellemesi</strong> (<code>Microsoft.WSL</code>) WSL&#39;i kapatır, yönetici yetkisi ister: en sona bırak, yönetici PowerShell&#39;de çalıştır, sonra bölüm 12.</li><li>Bazı paketler &quot;install technology is different&quot; der: eskisini kaldırıp yenisini <code>winget install</code> ile kur.</li><li><code>winget</code> SSH oturumu üzerinden &quot;Access is denied&quot; verir: uzaktaki Windows&#39;u güncellemek için o makinede oturum aç.</li><li>Canlı bir şey çalıştıran makinede (bot, sunucu) güncellemeyi o iş boştayken yap.</li></ul></section>
+<section id="b16"><h2>14. Güvenlik kuralları (kısa liste)</h2><ul><li>herdr soketi <strong>asla</strong> bir işçi sandbox&#39;ına girmez: soketi olan her şey her pane&#39;e (Claude oturumu dahil) yazı yazabilir. herdr&#39;ın OpenCode entegrasyonu da sandbox içinde kullanılmaz.</li><li>İşçiler: kimlik bilgisi yok, git yok, kendi worktree&#39;si dışında yazma yok, commit/merge yok. Wrapper değişince <code>check.sh</code>.</li><li>Gizli bilgiler (API anahtarları, <code>.env</code>, SSH anahtarları) repo dışında, <code>0600</code>. Repoya sadece üçüncü bir tarafa göstereceğin şeyi koy.</li><li>Tüm sshd&#39;ler: sadece açık anahtar; şifre ve keyboard-interactive kapalı. Windows sshd sadece Private profil (tailnet).</li><li>Uzak bir dosyayı değiştirmeden önce yanına tarihli yedek: <code>dosya.bak-YYYYMMDD-neden</code>. Geri alma adımını yaz.</li><li>Bir sembolik bağı değiştirmeden önce <code>command -v</code> ve <code>readlink -f</code> ile neyi değiştirdiğine bak (bir kere sistemdeki Node&#39;u farkında olmadan başka sürümle ezdik).</li><li><code>git push</code>, yayınlama, dışarıya bir şey gönderme: Claude sormadan yapmaz (settings.json <code>soft_deny</code>).</li><li>Canlı/üretim işleri (bot, sunucu) herdr içinde çalıştırılmaz; ayrı servis olarak çalışır.</li></ul></section>
+<section id="b17"><h2>15. Sorun giderme</h2><div class="tw"><table><thead><tr><th scope="col">Belirti</th><th scope="col">Sebep</th><th scope="col">Çözüm</th></tr></thead><tbody><tr><td>İşçi &quot;Unable to connect to the API&quot;, çıkış kodu 6, <code>EAI_AGAIN</code></td><td>Sandbox&#39;ta DNS yok</td><td><code>/mnt/wsl/resolv.conf</code> bağlı mı (sandbox.sh&#39;de var); <code>check.sh</code> DNS satırı</td></tr><tr><td>OpenCode &quot;database is locked&quot;</td><td>Paralel çalıştırmalar tek SQLite&#39;ı paylaşıyor</td><td>Her çalıştırmaya ayrı veri klasörü (sandbox.sh&#39;de var)</td></tr><tr><td>OpenCode &quot;Insufficient balance&quot;</td><td>Yanlış sağlayıcı öneki</td><td>Go aboneliği: <code>opencode-go/...</code>; konsolda bölge Global</td></tr><tr><td>herdr pane&#39;inde <code>powershell.exe: command not found</code></td><td>systemd servisi Windows PATH&#39;ini almıyor</td><td><code>herdr-server-start</code> (bölüm 5)</td></tr><tr><td><code>ssh pc &#39;lane ls&#39;</code> → <code>command not found</code></td><td>PATH <code>.bashrc</code>&#39;de etkileşim korumasının altında</td><td>PATH satırını <code>.bashrc</code>&#39;nin en üstüne taşı</td></tr><tr><td>Yeniden başlatma sonrası Heeler bağlanamıyor</td><td>Linger kapalı, kimse WSL&#39;e girmedi</td><td>WezTerm&#39;de WSL aç (bölüm 12) ya da <code>loginctl enable-linger</code></td></tr><tr><td>Windows sshd anahtarı kabul etmiyor</td><td>Yönetici kullanıcı, anahtar yanlış dosyada / izin yanlış</td><td><code>administrators_authorized_keys</code> + <code>icacls</code> (bölüm 10.2)</td></tr><tr><td>Bir betikte <code>pkill -f desen</code> çağıranı da öldürüyor (çıkış 144)</td><td>Desen çağıran komut satırında da geçiyor</td><td>Önce PID topla, PID ile öldür; ya da desene ikilinin tam yolunu koy</td></tr><tr><td>SSH ile ikinci oturum ilk komutu tekrar çalıştırıyor</td><td>Windows sshd&#39;de zorunlu komut + ControlMaster</td><td>Zorunlu komut yerine jump host (bölüm 10)</td></tr><tr><td><code>@dosya</code> import&#39;u yüklenmiyor</td><td>Proje dışına çıkan import sessizce atlanıyor</td><td>Ortak bilgiyi <code>~/.claude/rules/</code> altına koy</td></tr><tr><td><code>lane accept</code> PASS ama sıfır test</td><td>Test komutu verilmedi / sayılar okunamadı</td><td>Her zaman <code>--test</code> ver; rapordaki sayıları oku</td></tr><tr><td>İşçi &quot;testler geçti&quot; diyor, gerçek derleme kırık</td><td>İşçi sandbox&#39;ında derleme/araç eksik olabilir</td><td>Kabulü her zaman kendi ortamında <code>lane accept</code> ile yap</td></tr></tbody></table></div></section>
+<section id="b18"><h2>16. Kopya kağıdı</h2><figure class="code"><pre><code># --- paket kurulumu: KURULUM.md + extract.py aynı klasörde ---
+python3 extract.py                      # KURULUM.md&#39;deki file= bloklarından scripts/home/ üretir
+cp -rv scripts/home/. ~/ &amp;&amp; chmod +x ~/.local/bin/oc-worker ~/.local/bin/cc-worker ~/.local/bin/herdr-server-start \
+  ~/.local/lib/oc-worker/*.sh ~/.local/lib/oc-worker/jail-shell ~/.local/lib/cc-worker/*.sh
+
+# --- herdr ---
+herdr                                   # bağlan
+systemctl --user restart herdr-server   # sunucuyu yeniden başlat
+herdr workspace list                    # workspace&#39;ler
+
+# --- işçiler ---
+oc-worker &quot;soru&quot;                        # salt okunur
+oc-worker --write &quot;görev&quot;               # sadece oc-worker-NN worktree&#39;sinde
+cc-worker [--write] &quot;görev&quot;
+~/.local/lib/oc-worker/check.sh         # 17/17
+~/.local/lib/cc-worker/check.sh         # 17/17
+
+# --- lane ---
+lane new oc-worker-01 --from main --branch agent/oc-worker-01-&lt;etiket&gt;
+lane run oc-worker-01 brief.md
+lane accept oc-worker-01 --test &quot;&lt;komut&gt;&quot; --mutants mutants.json
+lane merge oc-worker-01 -m &quot;&lt;mesaj&gt;&quot; --test &quot;&lt;komut&gt;&quot;
+lane ls ; lane gc
+
+# --- Claude / Command Code oturumları ---
+claude -c ; claude -r ; cmd -c ; cmd -r</code></pre></figure></section>
+<section id="b19"><h2>17. Claude talimat dosyaları</h2><p>Pakette <code>CLAUDE.md</code> adlı ayrı dosya olarak da var. İçinde dört parça:</p><ol><li><strong>Kurulum asistanı talimatı:</strong> yeni makinede ilk Claude oturumuna yapıştır; Claude bu rehberi adım adım, onayınla uygular.</li><li>**<code>~/.claude/CLAUDE.md</code> şablonu:** her oturum için genel kurallar.</li><li>**<code>~/.claude/rules/hosts.md</code> şablonu:** makine bilgileri.</li><li>**Proje <code>CLAUDE.md</code> şablonu<strong> ve </strong><code>~/.claude/skills/lane/SKILL.md</code>** (lane skill&#39;i).</li></ol><p>İlk kurulumda en kolay yol: WSL + Node + Claude Code&#39;u (bölüm 1, 2 ve 6&#39;nın ilk satırları) elle kur, sonra bu klasörde <code>claude</code> başlat ve &quot;CLAUDE.md&#39;deki Kurulum asistanı talimatını uygula&quot; de.</p></section>
+<footer class="site-foot">Ev kurulumumuzdan bir rehber. Komutlar ve yollar önerimizdir; çalıştırmadan önce oku ve kendi makinene uyarla. Garanti yoktur.</footer>
+</main></body></html>
