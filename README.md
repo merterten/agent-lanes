@@ -151,6 +151,28 @@ What each lane needs decides where it goes:
 | macOS-only build or check | Mac minis (M2, M6) |
 | Watching, approving, nudging | Phone / tablet / MacBook Pro via Heeler |
 
+## Example project: what it cost
+
+[live.guytrades.workers.dev](https://live.guytrades.workers.dev) is a public page with eight demo-account forex and gold bots, built with this loop. Claude Code led and reviewed; Codex architected the first month; cheap DeepSeek agents ran the lanes; a local model on the 4090 did a private second review.
+
+Counts are measured from the tools' own session logs (Claude Code and Codex transcripts, OpenCode's session databases, the local reviewer's job folders), deduplicated per API response, from the first session (2026-10-10) to 2026-11-23.
+
+| Agent | Role | Tokens | Cost |
+|---|---|---|---|
+| Claude Code (Opus 5.5, plus a little Fable 5.2 and Haiku 5.5) | Lead coder and reviewer | 3.43 B, of which 3.38 B cache reads; 9.9 M output | **$1,198** at API list prices |
+| Codex (GPT models) | Architect, then reviewer (Oct 10 – Oct 28) | 1.49 B, of which 1.43 B cached; 8.7 M output | subscription |
+| OpenCode workers (DeepSeek Flash, some Pro) | ~420 lane runs (desktop + laptop) | 0.90 B, of which 0.87 B cache reads; 3.6 M output | **$12.58** |
+| Command Code workers (DeepSeek) | ~130 earlier lanes | not logged locally | – |
+| Local RTX 4090 (Qwen 27B) | 25 private code reviews of safety fixes | 9.8 M | **2.5 GPU-hours**, about 1 kWh |
+
+What this shows:
+
+- **Cache reads are the bill.** 98% of Claude's tokens are re-read context. Long lead sessions are cheap per token and expensive in total.
+- **The lanes were nearly free.** About 420 worker runs cost $12.58, roughly 1% of the lead's API-price cost. The expensive part is the lead reading diffs, writing mutants and reviewing.
+- **The local GPU paid for itself in findings, not tokens.** It took about 6 minutes per review and found real integrity bugs that the green test suites had missed.
+
+Notes: Claude and Codex ran on flat subscriptions, so their numbers are API-price equivalents, not cash spent. Claude Code deletes transcripts after 30 days, so Claude sessions before 2026-10-21 are missing and its number is a lower bound. Over the same period the project made 1,096 commits; its core test suite has 1,246 tests.
+
 ## Safety rules the tool enforces
 
 - Nothing in an agent's result file is ever executed. Test commands come from the reviewer.
