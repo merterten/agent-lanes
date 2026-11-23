@@ -170,7 +170,7 @@ Strategy research and testing behind it:
 | What | Count |
 |---|---|
 | Strategy studies (each with a brief, a pre-registered rule set or a written verdict) | 182 |
-| Third-party strategies and indicators tested and rejected | 62, published in [forex-strategy-graveyard](https://github.com/merterten/forex-strategy-graveyard) |
+| Third-party strategies and indicators tested and rejected | 62 |
 | Strategy configurations run forward on demo accounts | 21 (8 at a time) |
 | Revisions to the bot's core code | 98 commits; at least 7 live packages deployed since 2026-11-13 |
 | Automated tests | 1,246 in the bot's core suite, plus 102 Python test files for tools and dashboard |
