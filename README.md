@@ -162,16 +162,16 @@ Counts are measured from the tools' own session logs (Claude Code and Codex tran
 | Claude Code (Opus 5.5, plus a little Fable 5.2 and Haiku 5.5) | Lead coder and reviewer | 3.43 B, of which 3.38 B cache reads; 9.9 M output | **$1,198** at API list prices |
 | Codex (GPT models) | Architect, then reviewer (Oct 10 – Oct 28) | 1.49 B, of which 1.43 B cached; 8.7 M output | subscription |
 | OpenCode workers (DeepSeek Flash, some Pro) | ~420 lane runs (desktop + laptop) | 0.90 B, of which 0.87 B cache reads; 3.6 M output | **$12.58** |
-| Command Code workers (DeepSeek) | ~130 earlier lanes | not logged locally | – |
+| Command Code workers (mostly DeepSeek V4.1 Flash) | ~130 lanes, 41,562 requests (Nov) | 7.2 B | **$10** flat plan (99% of the monthly limit used) |
 | Local RTX 4090 (Qwen 27B) | 25 private code reviews of safety fixes | 9.8 M | **2.5 GPU-hours**, about 1 kWh |
 
 What this shows:
 
 - **Cache reads are the bill.** 98% of Claude's tokens are re-read context. Long lead sessions are cheap per token and expensive in total.
-- **The lanes were nearly free.** About 420 worker runs cost $12.58, roughly 1% of the lead's API-price cost. The expensive part is the lead reading diffs, writing mutants and reviewing.
+- **The lanes were nearly free.** The workers burned more tokens than the lead (8.1 B vs 3.4 B) for about $23 in total: $12.58 on OpenCode and a $10 Command Code plan, roughly 2% of the lead's API-price cost. The expensive part is the lead reading diffs, writing mutants and reviewing.
 - **The local GPU paid for itself in findings, not tokens.** It took about 6 minutes per review and found real integrity bugs that the green test suites had missed.
 
-Notes: Claude and Codex ran on flat subscriptions, so their numbers are API-price equivalents, not cash spent. Claude Code deletes transcripts after 30 days, so Claude sessions before 2026-10-21 are missing and its number is a lower bound. Over the same period the project made 1,096 commits; its core test suite has 1,246 tests.
+Notes: Claude and Codex ran on flat subscriptions, so their numbers are API-price equivalents, not cash spent. The Command Code figures come from its account dashboard for the November billing month (the plan started 2026-11-01). Claude Code deletes transcripts after 30 days, so Claude sessions before 2026-10-21 are missing and its number is a lower bound. Over the same period the project made 1,096 commits; its core test suite has 1,246 tests.
 
 ## Safety rules the tool enforces
 
