@@ -62,3 +62,41 @@ Both came back green; review still found three real bugs:
 | AL2 | No test pinned the allocator's own per-host capacity check | Only a second guard in the queue protected it |
 
 Each fix came with a test; reviewer mutants on the new code: 14 / 14 killed.
+
+## Round 3: bugs found in real use (23 November 2026)
+
+Using the tool on real work turned up two bugs that 311 green tests did not cover:
+
+| Bug | What happened | Cause |
+|---|---|---|
+| Local `lane run`, `review` and `ask` passed their own stdin to the worker | Started from an agent's shell, an OpenCode worker printed nothing and never returned, until an outer 10-minute timeout | `opencode run` reads stdin when it is not a terminal. Round 2 fixed exactly this for the ssh calls (AL1), but not for the local worker launch |
+| `lane merge` failed with *"paths are ignored"* | Every merge in a repo that lists `.lane/` in `.gitignore` | `git add -A -- . ':!.lane'` names an ignored path, and git refuses that even as an exclusion |
+
+Fixes: every worker, ssh and test launch now gets `stdin=/dev/null`; merge stages with a plain `git add -A -- .` and the existing
+`restore --staged` step keeps `.lane/` out of the commit. The regression tests put an open pipe on the test's own stdin first,
+so they cannot pass by accident in a CI where stdin is already closed. Reverting either fix fails a test.
+
+## Round 4: a real job, and these docs (same day)
+
+**Eight intros, four lanes.** Four OpenCode lanes wrote eight "what does X do?" intros (text plus an SVG diagram each) for our
+Turkish setup guide. A contract test came first: required facts per tool, word limits, safe SVG (allowed tags and classes only,
+every shape inside its box). Result: 8/8 files passed, 24/24 reviewer mutants killed. Reading every sentence still found one
+factual error no test could see: an intro said long-running live jobs run inside herdr, the opposite of our rule.
+This job is also where the `lane merge` bug above showed up.
+
+**This README.** The split between the tool and our setup was planned by an OpenCode worker in read-only mode. Its first planning
+run hung on the same stdin bug: it was started through the wrapper directly, not through `lane`, so the fix did not apply. With
+stdin closed, the second run answered in about three minutes. The reviewer kept most of the plan and changed two things (where
+the diagram lives, and a visible link to the Turkish guide instead of a hidden one).
+
+The docs are tested now too: every public page is checked for private data, every relative link, image and heading anchor must
+resolve, the four diagram files must match their generator, and the English and Turkish READMEs must have the same structure.
+315 tests.
+
+## Lessons, continued
+
+6. **A bug fixed in one place is usually still somewhere else.** Round 2 closed stdin for ssh; the local launch kept the same bug
+   for a day. After a fix, search for every other call of the same kind.
+7. **Tests check shape, not meaning.** A contract test can prove every intro has its facts and a safe diagram; only reading proves
+   a sentence is true.
+8. **Use the tool on real work early.** Both Round 3 bugs were invisible to the test suite and obvious within an hour of real use.
